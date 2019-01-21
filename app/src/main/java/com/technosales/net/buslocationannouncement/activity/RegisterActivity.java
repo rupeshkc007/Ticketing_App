@@ -36,7 +36,8 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                 reg_device_number.setText(sharedPreferences.getString(UtilStrings.DEVICE_ID, ""));
             } else {
 
-                startActivity(new Intent(this, AnnounceActivity.class));
+                /*startActivity(new Intent(this, AnnounceActivity.class));*/
+                startActivity(new Intent(this, TicketAndTracking.class));
                 finish();
             }
         }

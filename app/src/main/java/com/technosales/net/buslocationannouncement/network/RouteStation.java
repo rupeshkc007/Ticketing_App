@@ -7,6 +7,7 @@ import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 import com.technosales.net.buslocationannouncement.activity.AnnounceActivity;
+import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
@@ -52,7 +53,8 @@ public class RouteStation {
                         }
                     }
                     context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.ROUTE_ID, routeId).apply();
-                    context.startActivity(new Intent(context, AnnounceActivity.class));
+                    /*context.startActivity(new Intent(context, AnnounceActivity.class));*/
+                    context.startActivity(new Intent(context, TicketAndTracking.class));
                 }
             });
         }

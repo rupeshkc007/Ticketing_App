@@ -32,5 +32,8 @@ dependencies {
 
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:7.0.0'
 
+    implementation 'com.github.angads25:toggle:1.0.0'
+
+
 
 }

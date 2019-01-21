@@ -26,6 +26,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.technosales.net.buslocationannouncement.network.RouteStation;
+import com.technosales.net.buslocationannouncement.pojo.PriceList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.trackcar.Position;
 
@@ -44,6 +45,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String STATION_NAME = "name_nepali";
     public static final String STATION_LAT = "latitude";
     public static final String STATION_LNG = "longitude";
+
+
+    public static final String PRICE_TABLE = "price_table";
+    public static final String PRICE_VALUE = "price_value";
 
 
     public interface DatabaseHandler<T> {
@@ -107,6 +112,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 STATION_NAME + " TEXT," +
                 STATION_LAT + " TEXT," +
                 STATION_LNG + " TEXT)");
+
+        db.execSQL("CREATE TABLE price_table (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                PRICE_VALUE + " TEXT)");
     }
 
     @Override
@@ -149,6 +158,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sqLiteDatabase.insert(ROUTE_STATION_TABLE, null, contentValues);
 
         Log.i("routeStation", "" + routeStationList.station_order + ":" + routeStationList.station_name);
+    }
+
+    public void insertPrice(ContentValues contentValues) {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        Log.i("getValue", "" + contentValues.toString());
+        sqLiteDatabase.insert(PRICE_TABLE, null, contentValues);
+    }
+
+    public List<PriceList> priceLists(int id) {
+        List<PriceList> priceLists = new ArrayList<>();
+
+        String sql = "SELECT * FROM " + PRICE_TABLE + " WHERE id >" + id;
+        Cursor c = getWritableDatabase().rawQuery(sql, null);
+        while (c.moveToNext()) {
+            PriceList priceList = new PriceList();
+            priceList.price_value = c.getString(c.getColumnIndex(PRICE_VALUE));
+            priceLists.add(priceList);
+        }
+        return priceLists;
+
     }
 
     public List<RouteStationList> routeStationLists() {
