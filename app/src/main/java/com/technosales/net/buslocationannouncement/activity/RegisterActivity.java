@@ -11,6 +11,7 @@ import android.widget.Button;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.network.RegisterDevice;
+import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
 
 public class RegisterActivity extends AppCompatActivity implements View.OnClickListener {
@@ -28,12 +29,17 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         viewIniialize();
 
         databaseHelper = new DatabaseHelper(this);
+        sharedPreferences = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0);
 
         if (databaseHelper.routeStationLists().size() > 1) {
-            startActivity(new Intent(this, AnnounceActivity.class));
-        }
+            if (GeneralUtils.isNetworkAvailable(this)) {
+                reg_device_number.setText(sharedPreferences.getString(UtilStrings.DEVICE_ID, ""));
+            } else {
 
-        sharedPreferences = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0);
+                startActivity(new Intent(this, AnnounceActivity.class));
+                finish();
+            }
+        }
 
 
     }

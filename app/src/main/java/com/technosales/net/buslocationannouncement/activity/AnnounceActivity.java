@@ -116,9 +116,8 @@ public class AnnounceActivity extends AppCompatActivity implements MapboxMap.OnM
         alarmIntent = PendingIntent.getBroadcast(this, 0, new Intent(this, AutostartReceiver.class), 0);
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         trackCarPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        trackCarPrefs.edit().putString(KEY_DEVICE, "8160864759").apply();
-        trackCarPrefs.edit().putString(KEY_URL, "http://117.121.237.226:5001").apply();
-//        trackCarPrefs.edit().putString(KEY_DEVICE, getSharedPreferences(UtilStrings.SHARED_PREFERENCES,0).getString(UtilStrings.DEVICE_ID,"")).apply();
+        trackCarPrefs.edit().putString(KEY_URL, getResources().getString(R.string.settings_url_default_value)).apply();
+        trackCarPrefs.edit().putString(KEY_DEVICE, getSharedPreferences(UtilStrings.SHARED_PREFERENCES,0).getString(UtilStrings.DEVICE_ID,"")).apply();
 
         new TrackingController(this);
         startTrackingService(true, false);

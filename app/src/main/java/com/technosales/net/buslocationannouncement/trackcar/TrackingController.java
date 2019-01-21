@@ -56,6 +56,7 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
     private List<RouteStationList> routeStationLists = new ArrayList<>();
     private TextToVoice textToVoice;
     private int preOrder = 0;
+    private String preOrderId = "";
     private String nextStation;
 
     private void lock() {
@@ -124,8 +125,9 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
 
                 float distance = GeneralUtils.calculateDistance(stationLat, stationLng, position.getLatitude(), position.getLongitude());
                 int currentOrder = routeStationList.station_order;
-                if (distance <= 80) {
-                    if (preOrder != currentOrder) {
+                String currentOrderId = routeStationList.station_id;
+                if (distance <= 50) {
+                    if (!currentOrderId.equals(preOrderId)) {
                         if (preOrder < currentOrder) {
                             if (currentOrder == routeStationLists.size()) {
                                 nextStation = databaseHelper.nextStation(currentOrder - 1);
@@ -146,6 +148,7 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
 
                         }
                         preOrder = currentOrder;
+                        preOrderId = currentOrderId;
 
                         textToVoice.speakStation(routeStationList.station_name, nextStation);
                     }
