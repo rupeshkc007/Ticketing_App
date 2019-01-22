@@ -16,6 +16,8 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 
 import com.github.angads25.toggle.LabeledSwitch;
 import com.github.angads25.toggle.interfaces.OnToggledListener;
@@ -52,6 +54,7 @@ public class TicketAndTracking extends AppCompatActivity {
     private DatabaseHelper databaseHelper;
     private RecyclerView priceListView;
     public LabeledSwitch normalDiscountToggle;
+    private TextView totalCollectionTickets;
 
 
     @Override
@@ -73,11 +76,13 @@ public class TicketAndTracking extends AppCompatActivity {
         /**/
         priceListView = findViewById(R.id.priceListView);
         normalDiscountToggle = findViewById(R.id.normalDiscountToggle);
+        totalCollectionTickets = findViewById(R.id.totalCollectionTickets);
+
         normalDiscountToggle.setLabelOn(getString(R.string.discount_rate));
         normalDiscountToggle.setLabelOff(getString(R.string.normal_rate));
         normalDiscountToggle.setOn(false);
 
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 3);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 4);
         priceListView.setLayoutManager(gridLayoutManager);
         priceListView.setHasFixedSize(true);
 
@@ -102,11 +107,33 @@ public class TicketAndTracking extends AppCompatActivity {
 
             }
         });
+
+        totalCollectionTickets.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().remove(UtilStrings.TOTAL_TICKETS).apply();
+                getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().remove(UtilStrings.TOTAL_COLLECTIONS).apply();
+                setTotal();
+            }
+        });
+
+        setTotal();
     }
 
     public void setPriceLists(int min) {
         priceLists = databaseHelper.priceLists(min);
         priceListView.setAdapter(new PriceAdapter(priceLists, TicketAndTracking.this));
+        setTotal();
+
+    }
+
+    public void setTotal() {
+        int totalTickets = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.TOTAL_TICKETS, 0);
+        int totalCollections = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.TOTAL_COLLECTIONS, 0);
+//        totalCollectionTickets.setText("Total Tickets :" + String.valueOf(totalTickets) + "\n Total Colletions :" + String.valueOf(totalCollections));
+        totalCollectionTickets.setText(getString(R.string.total_tickets) + GeneralUtils.getUnicodeNumber(totalTickets) + "\n" + getString(R.string.total_collections) + GeneralUtils.getUnicodeNumber(totalCollections));
+
+
     }
 
 

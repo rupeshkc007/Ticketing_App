@@ -6,6 +6,8 @@ public class UtilStrings {
     public static final String LONGITUDE = "longitude";
     public static final String DEVICE_ID = "device_id";
     public static final String ROUTE_ID = "route_id";
+    public static final String TOTAL_TICKETS="total_tickets";
+    public static final String TOTAL_COLLECTIONS="total_collections";
 
 
     public static final String MAIN_URL = "http://202.52.240.149/route_api/public/api/";

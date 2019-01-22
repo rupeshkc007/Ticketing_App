@@ -54,6 +54,8 @@
     <string name="show_location_image">Show Location Image</string>
     <string name="select_route_number">Select Route Number</string>
     <string name="title_activity_maps">Map</string>
-    <string name="normal_rate">Normal</string>
-    <string name="discount_rate">Discount</string>
+    <string name="normal_rate">साधारण</string>
+    <string name="discount_rate">छुट</string>
+    <string name="total_tickets">जम्मा टिकट -</string>
+    <string name="total_collections">जम्मा संकलन -रु.</string>
 </resources>

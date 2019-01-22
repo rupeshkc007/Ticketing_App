@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="10dp"
     tools:context=".activity.TicketAndTracking">
 
     <com.github.angads25.toggle.LabeledSwitch
         android:id="@+id/normalDiscountToggle"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="end"
+        android:layout_alignParentRight="true"
+        android:layout_margin="10dp"
         android:textSize="25sp"
         app:colorBorder="#2403fc"
         app:on="false" />
@@ -20,6 +19,22 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/priceListView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/normalDiscountToggle"
+        android:layout_above="@+id/totalCollectionTickets"
+        android:overScrollMode="never"/>
 
-</LinearLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="bottom"
+        android:background="@android:color/black"
+        android:textColor="@android:color/white"
+        android:textSize="25sp"
+        android:textAlignment="center"
+        android:id="@+id/totalCollectionTickets"/>
+
+
+
+</RelativeLayout>

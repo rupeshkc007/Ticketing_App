@@ -152,6 +152,7 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
 
                         textToVoice.speakStation(routeStationList.station_name, nextStation);
                     }
+                    break;
                 }
 
             }

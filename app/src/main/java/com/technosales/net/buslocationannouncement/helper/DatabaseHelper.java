@@ -28,6 +28,7 @@ import android.util.Log;
 import com.technosales.net.buslocationannouncement.network.RouteStation;
 import com.technosales.net.buslocationannouncement.pojo.PriceList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
+import com.technosales.net.buslocationannouncement.pojo.TicketInfoList;
 import com.technosales.net.buslocationannouncement.trackcar.Position;
 
 import java.util.ArrayList;
@@ -49,6 +50,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public static final String PRICE_TABLE = "price_table";
     public static final String PRICE_VALUE = "price_value";
+
+
+    public static final String TICKET_TABLE = "ticket_table";
+    public static final String TICKET_NUMBER = "ticket_number";
+    public static final String TICKET_PRICE = "ticket_price";
+    public static final String TICKET_TYPE = "ticket_type";
+    public static final String TICKET_DATE = "ticket_date";
+    public static final String TICKET_TIME = "ticket_time";
+    public static final String TICKET_LAT = "ticket_lat";
+    public static final String TICKET_LNG = "ticket_lng";
 
 
     public interface DatabaseHandler<T> {
@@ -92,6 +103,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+
+        createTables(db);
+    }
+
+    private void createTables(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE position (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "deviceId TEXT," +
@@ -105,6 +121,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "battery REAL," +
                 "mock INTEGER)");
 
+        db.execSQL("CREATE TABLE ticket_table (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                TICKET_NUMBER + " TEXT," +
+                TICKET_PRICE + " TEXT," +
+                TICKET_TYPE + " TEXT," +
+                TICKET_DATE + " TEXT," +
+                TICKET_TIME + " TEXT," +
+                TICKET_LAT + " TEXT," +
+                TICKET_LNG + " TEXT)");
+
+        db.execSQL("CREATE TABLE price_table (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                PRICE_VALUE + " TEXT)");
+
         db.execSQL("CREATE TABLE route_station (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 STATION_ID + " TEXT," +
@@ -112,20 +142,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 STATION_NAME + " TEXT," +
                 STATION_LAT + " TEXT," +
                 STATION_LNG + " TEXT)");
-
-        db.execSQL("CREATE TABLE price_table (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                PRICE_VALUE + " TEXT)");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS position;");
+        db.execSQL("DROP TABLE IF EXISTS ticket_table;");
+        db.execSQL("DROP TABLE IF EXISTS price_table;");
+        db.execSQL("DROP TABLE IF EXISTS route_station;");
         onCreate(db);
     }
 
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS position;");
+        db.execSQL("DROP TABLE IF EXISTS ticket_table;");
+        db.execSQL("DROP TABLE IF EXISTS price_table;");
+        db.execSQL("DROP TABLE IF EXISTS route_station;");
         onCreate(db);
     }
 
@@ -164,6 +196,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
         Log.i("getValue", "" + contentValues.toString());
         sqLiteDatabase.insert(PRICE_TABLE, null, contentValues);
+    }
+
+    public void insertTicketInfo(TicketInfoList ticketInfoList) {
+        ContentValues contentValues = new ContentValues();
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        contentValues.put(TICKET_NUMBER, ticketInfoList.ticketNumber);
+        contentValues.put(TICKET_PRICE, ticketInfoList.ticketPrice);
+        contentValues.put(TICKET_TYPE, ticketInfoList.ticketType);
+        contentValues.put(TICKET_DATE, ticketInfoList.ticketDate);
+        contentValues.put(TICKET_TIME, ticketInfoList.ticketTime);
+        contentValues.put(TICKET_LAT, ticketInfoList.ticketLat);
+        contentValues.put(TICKET_LNG, ticketInfoList.ticketLng);
+        sqLiteDatabase.insert(TICKET_TABLE, null, contentValues);
+        Log.i("getTicketValue", "" + contentValues.toString());
+
     }
 
     public List<PriceList> priceLists(int id) {
