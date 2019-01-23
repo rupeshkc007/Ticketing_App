@@ -2,6 +2,8 @@ package com.technosales.net.buslocationannouncement.adapter;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,6 +52,15 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
     public void onBindViewHolder(final MyViewHolder holder, final int position) {
         final PriceList priceList = priceLists.get(position);
         holder.price_value.setText(priceList.price_value);
+
+        if (((TicketAndTracking) context).normalDiscountToggle.isOn()) {
+            holder.price_value.setTextColor(context.getResources().getColorStateList(R.color.discount_txt_color));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                holder.price_value.setBackground(ContextCompat.getDrawable(context, R.drawable.discount_price_bg));
+            }
+        } else {
+        }
+
         holder.price_value.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -68,6 +79,7 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
 
                 if (((TicketAndTracking) context).normalDiscountToggle.isOn()) {
                     ticketType = "discount";
+
                     /*((TicketAndTracking) context).normalDiscountToggle.setOn(false);
                     ((TicketAndTracking) context).setPriceLists(4);*/
                 } else {
@@ -86,7 +98,7 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
                 }
 
                 TicketInfoList ticketInfoList = new TicketInfoList();
-                ticketInfoList.ticketNumber = deviceId.substring(deviceId.length() - 2) + GeneralUtils.getDate() + "" + valueOfTickets;
+                ticketInfoList.ticketNumber = deviceId.substring(deviceId.length() - 4) + GeneralUtils.getDate() + "" + valueOfTickets;
                 ticketInfoList.ticketPrice = String.valueOf(Integer.parseInt(priceList.price_value));
                 ticketInfoList.ticketType = ticketType;
                 ticketInfoList.ticketDate = GeneralUtils.getDate();

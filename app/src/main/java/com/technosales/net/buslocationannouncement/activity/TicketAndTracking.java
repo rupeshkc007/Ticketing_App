@@ -81,6 +81,8 @@ public class TicketAndTracking extends AppCompatActivity {
         normalDiscountToggle.setLabelOn(getString(R.string.discount_rate));
         normalDiscountToggle.setLabelOff(getString(R.string.normal_rate));
         normalDiscountToggle.setOn(false);
+        /*normalDiscountToggle.setColorOff(getResources().getColor(android.R.color.black));
+        normalDiscountToggle.setColorOn(getResources().getColor(R.color.colorAccent));*/
 
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 4);
         priceListView.setLayoutManager(gridLayoutManager);

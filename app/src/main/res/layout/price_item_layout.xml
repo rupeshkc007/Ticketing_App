@@ -20,7 +20,7 @@
             android:background="@drawable/price_item_bg"
             android:gravity="center"
             android:padding="5dp"
-            android:textColor="@drawable/text_color"
+            android:textColor="@color/text_color"
             android:textSize="40sp" />
 
     </android.support.v7.widget.CardView>
