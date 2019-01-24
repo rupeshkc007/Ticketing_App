@@ -69,6 +69,7 @@ public class TicketAndTracking extends AppCompatActivity {
         trackCarPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         trackCarPrefs.edit().putString(KEY_URL, getResources().getString(R.string.settings_url_default_value)).apply();
         trackCarPrefs.edit().putString(KEY_DEVICE, getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.DEVICE_ID, "")).apply();
+        /*trackCarPrefs.edit().putString(KEY_DEVICE, "12345678").apply();*/
         databaseHelper = new DatabaseHelper(this);
         new TrackingController(this);
         startTrackingService(true, false);

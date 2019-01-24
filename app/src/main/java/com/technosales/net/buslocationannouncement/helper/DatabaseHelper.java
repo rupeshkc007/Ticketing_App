@@ -26,10 +26,16 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.technosales.net.buslocationannouncement.network.RouteStation;
+import com.technosales.net.buslocationannouncement.network.TicketInfoDataPush;
 import com.technosales.net.buslocationannouncement.pojo.PriceList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.pojo.TicketInfoList;
 import com.technosales.net.buslocationannouncement.trackcar.Position;
+import com.technosales.net.buslocationannouncement.utils.UtilStrings;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -60,6 +66,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String TICKET_TIME = "ticket_time";
     public static final String TICKET_LAT = "ticket_lat";
     public static final String TICKET_LNG = "ticket_lng";
+    private final Context context;
 
 
     public interface DatabaseHandler<T> {
@@ -98,6 +105,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        this.context = context;
         db = getWritableDatabase();
     }
 
@@ -209,7 +217,67 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         contentValues.put(TICKET_LAT, ticketInfoList.ticketLat);
         contentValues.put(TICKET_LNG, ticketInfoList.ticketLng);
         sqLiteDatabase.insert(TICKET_TABLE, null, contentValues);
-        Log.i("getTicketValue", "" + contentValues.toString());
+
+        ticketInfoLists();
+
+    }
+
+    public void ticketInfoLists() {
+        List<TicketInfoList> ticketInfoLists = new ArrayList<>();
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM " + TICKET_TABLE, null);
+        while (cursor.moveToNext()) {
+            TicketInfoList ticketInfoList = new TicketInfoList();
+            ticketInfoList.ticketNumber = cursor.getString(cursor.getColumnIndex(TICKET_NUMBER));
+            ticketInfoList.ticketPrice = cursor.getString(cursor.getColumnIndex(TICKET_PRICE));
+            ticketInfoList.ticketType = cursor.getString(cursor.getColumnIndex(TICKET_TYPE));
+            ticketInfoList.ticketDate = cursor.getString(cursor.getColumnIndex(TICKET_DATE));
+            ticketInfoList.ticketTime = cursor.getString(cursor.getColumnIndex(TICKET_TIME));
+            ticketInfoList.ticketLat = cursor.getString(cursor.getColumnIndex(TICKET_LAT));
+            ticketInfoList.ticketLng = cursor.getString(cursor.getColumnIndex(TICKET_LNG));
+            ticketInfoLists.add(ticketInfoList);
+
+
+        }
+        cursor.close();
+
+        Log.i("getJsonObject", "" + getJsonData(ticketInfoLists));
+        TicketInfoDataPush.pushBusData(context, getJsonData(ticketInfoLists));
+    }
+
+    public JSONObject getJsonData(List<TicketInfoList> ticketInfoLists) {
+        JSONObject object = new JSONObject();
+        try {
+            JSONArray array = new JSONArray();
+            for (int i = 0; i < ticketInfoLists.size(); i++) {
+                TicketInfoList ticketInfoList = ticketInfoLists.get(i);
+                JSONObject jsonObject = new JSONObject();
+
+                jsonObject.put("device_id", context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.DEVICE_ID, ""));
+                jsonObject.put("helper_id", "1");
+                jsonObject.put("ticket_number", ticketInfoList.ticketNumber);
+                jsonObject.put("price", ticketInfoList.ticketPrice);
+                jsonObject.put("device_time", ticketInfoList.ticketDate + " " + ticketInfoList.ticketTime);
+                jsonObject.put("ticket_type", ticketInfoList.ticketType);
+                jsonObject.put("latitude", ticketInfoList.ticketLat);
+                jsonObject.put("longitude", ticketInfoList.ticketLng);
+                jsonObject.put("trip", "1");
+
+                array.put(jsonObject);
+
+            }
+            object.put("data", array);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return object;
+    }
+
+    public void deleteFromLocal() {
+        String sql = "DELETE FROM " + TICKET_TABLE;
+        Log.i("deleteFromLocal", "" + sql);
+        getWritableDatabase().execSQL(sql);
 
     }
 

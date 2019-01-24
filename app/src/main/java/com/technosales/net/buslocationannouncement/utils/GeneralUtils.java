@@ -79,9 +79,15 @@ public class GeneralUtils {
         return df.format(c.getTime());
     }
 
+    public static String getFullDate() {
+        Calendar c = Calendar.getInstance();
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        return df.format(c.getTime());
+    }
+
     public static String getTime() {
         Calendar c = Calendar.getInstance();
-        SimpleDateFormat df = new SimpleDateFormat("HH:mm");
+        SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
         return df.format(c.getTime());
     }
 

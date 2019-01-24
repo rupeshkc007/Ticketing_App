@@ -5,10 +5,10 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -86,7 +86,6 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
                     ticketType = "full";
                 }
                 ((TicketAndTracking) context).setTotal();
-                Toast.makeText(context, GeneralUtils.getTime(), Toast.LENGTH_SHORT).show();
                 String valueOfTickets = "";
                 if (total_tickets < 10) {
                     valueOfTickets = "00" + String.valueOf(total_tickets);
@@ -101,12 +100,14 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
                 ticketInfoList.ticketNumber = deviceId.substring(deviceId.length() - 4) + GeneralUtils.getDate() + "" + valueOfTickets;
                 ticketInfoList.ticketPrice = String.valueOf(Integer.parseInt(priceList.price_value));
                 ticketInfoList.ticketType = ticketType;
-                ticketInfoList.ticketDate = GeneralUtils.getDate();
+                ticketInfoList.ticketDate = GeneralUtils.getFullDate();
                 ticketInfoList.ticketTime = GeneralUtils.getTime();
                 ticketInfoList.ticketLat = latitude;
                 ticketInfoList.ticketLng = longitude;
 
                 databaseHelper.insertTicketInfo(ticketInfoList);
+
+                /*Log.i("TicketInfoSize", "" + String.valueOf(databaseHelper.ticketInfoLists().size()));*/
 
             }
         });

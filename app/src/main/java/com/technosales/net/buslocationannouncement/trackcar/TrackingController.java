@@ -161,7 +161,7 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
             context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LATITUDE, String.valueOf(position.getLatitude())).apply();
             context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LONGITUDE, String.valueOf(position.getLongitude())).apply();
 
-            Log.v("Location", "bat :" + position.getBattery());
+            Log.v("Location", "pos :" + position.getLatitude()+","+position.getLongitude());
         }
     }
 
