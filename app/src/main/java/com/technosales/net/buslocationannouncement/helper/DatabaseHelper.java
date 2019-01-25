@@ -218,11 +218,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         contentValues.put(TICKET_LNG, ticketInfoList.ticketLng);
         sqLiteDatabase.insert(TICKET_TABLE, null, contentValues);
 
-        ticketInfoLists();
+        boolean datasending = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getBoolean(UtilStrings.DATA_SENDING, false);
+        if (!datasending) {
+            ticketInfoLists();
+        }
+
 
     }
 
     public void ticketInfoLists() {
+        int id = 0;
         List<TicketInfoList> ticketInfoLists = new ArrayList<>();
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
         Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM " + TICKET_TABLE, null);
@@ -236,12 +241,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             ticketInfoList.ticketLat = cursor.getString(cursor.getColumnIndex(TICKET_LAT));
             ticketInfoList.ticketLng = cursor.getString(cursor.getColumnIndex(TICKET_LNG));
             ticketInfoLists.add(ticketInfoList);
-
+            id = cursor.getInt(cursor.getColumnIndex("id"));
 
         }
         cursor.close();
 
-        Log.i("getJsonObject", "" + getJsonData(ticketInfoLists));
+        context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putInt(UtilStrings.LAST_DATA_ID, id).apply();
         TicketInfoDataPush.pushBusData(context, getJsonData(ticketInfoLists));
     }
 
@@ -275,7 +280,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void deleteFromLocal() {
-        String sql = "DELETE FROM " + TICKET_TABLE;
+        int id = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.LAST_DATA_ID, 1);
+        String sql = "DELETE FROM " + TICKET_TABLE + " WHERE id<=" + id;
         Log.i("deleteFromLocal", "" + sql);
         getWritableDatabase().execSQL(sql);
 

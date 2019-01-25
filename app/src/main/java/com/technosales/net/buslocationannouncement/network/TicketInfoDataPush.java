@@ -19,7 +19,8 @@ import java.util.Map;
 
 public class TicketInfoDataPush {
 
-    public static void pushBusData(final Context context, JSONObject ticketInfoObject) {
+    public static void pushBusData(final Context context, final JSONObject ticketInfoObject) {
+        context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.DATA_SENDING, true).apply();
         if (GeneralUtils.isNetworkAvailable(context)) {
             Map<String, Object> params = new HashMap<>();
             params.put("data", ticketInfoObject);
@@ -34,13 +35,17 @@ public class TicketInfoDataPush {
                     if (object != null) {
                         if (object.optString("error").equals("false")) {
                             new DatabaseHelper(context).deleteFromLocal();
+                            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.DATA_SENDING, false).apply();
                         }
 
                     } else {
+                        pushBusData(context, ticketInfoObject);
                     }
                 }
             });
         } else {
+            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.DATA_SENDING, false).apply();
+
         }
 
     }

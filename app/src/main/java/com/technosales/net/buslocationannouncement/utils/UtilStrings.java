@@ -9,6 +9,9 @@ public class UtilStrings {
     public static final String TOTAL_TICKETS = "total_tickets";
     public static final String TOTAL_COLLECTIONS = "total_collections";
     public static final String DATE_TIME = "date_time";
+    public static final String DATA_SENDING = "data_sent";
+    public static final String LAST_DATA_ID = "last_data_id";
+
 
 
     public static final String MAIN_URL = "http://202.52.240.149/route_api/public/api/";

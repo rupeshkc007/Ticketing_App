@@ -79,9 +79,6 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
 
                 if (((TicketAndTracking) context).normalDiscountToggle.isOn()) {
                     ticketType = "discount";
-
-                    /*((TicketAndTracking) context).normalDiscountToggle.setOn(false);
-                    ((TicketAndTracking) context).setPriceLists(4);*/
                 } else {
                     ticketType = "full";
                 }
@@ -104,6 +101,7 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
                 ticketInfoList.ticketTime = GeneralUtils.getTime();
                 ticketInfoList.ticketLat = latitude;
                 ticketInfoList.ticketLng = longitude;
+
 
                 databaseHelper.insertTicketInfo(ticketInfoList);
 

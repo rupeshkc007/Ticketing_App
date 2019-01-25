@@ -101,7 +101,6 @@ public class TicketAndTracking extends AppCompatActivity {
             @Override
             public void onSwitched(LabeledSwitch labeledSwitch, boolean isOn) {
                 if (isOn) {
-
                     setPriceLists(0);
                 } else {
                     setPriceLists(4);
@@ -110,6 +109,13 @@ public class TicketAndTracking extends AppCompatActivity {
 
             }
         });
+        String isToday = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.DATE_TIME, "");
+        if (!isToday.equals(GeneralUtils.getDate())) {
+            getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.DATE_TIME, GeneralUtils.getDate()).apply();
+            getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().remove(UtilStrings.TOTAL_TICKETS).apply();
+            getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().remove(UtilStrings.TOTAL_COLLECTIONS).apply();
+            setTotal();
+        }
 
         totalCollectionTickets.setOnClickListener(new View.OnClickListener() {
             @Override
