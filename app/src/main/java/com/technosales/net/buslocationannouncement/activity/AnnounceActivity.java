@@ -117,7 +117,7 @@ public class AnnounceActivity extends AppCompatActivity implements MapboxMap.OnM
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         trackCarPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         trackCarPrefs.edit().putString(KEY_URL, getResources().getString(R.string.settings_url_default_value)).apply();
-        trackCarPrefs.edit().putString(KEY_DEVICE, getSharedPreferences(UtilStrings.SHARED_PREFERENCES,0).getString(UtilStrings.DEVICE_ID,"")).apply();
+        trackCarPrefs.edit().putString(KEY_DEVICE, getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.DEVICE_ID, "")).apply();
 
         new TrackingController(this);
         startTrackingService(true, false);
@@ -138,12 +138,12 @@ public class AnnounceActivity extends AppCompatActivity implements MapboxMap.OnM
         }
 
         if (permission) {
-            ContextCompat.startForegroundService(this, new Intent(this, TrackingService.class));
-            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    ALARM_MANAGER_INTERVAL, ALARM_MANAGER_INTERVAL, alarmIntent);
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
 
+                ContextCompat.startForegroundService(this, new Intent(this, TrackingService.class));
             }
+            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                    ALARM_MANAGER_INTERVAL, ALARM_MANAGER_INTERVAL, alarmIntent);
         } else {
 
         }

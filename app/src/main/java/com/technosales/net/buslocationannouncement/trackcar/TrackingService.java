@@ -17,18 +17,23 @@ package com.technosales.net.buslocationannouncement.trackcar;
 
 import android.annotation.TargetApi;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.IBinder;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.technosales.net.buslocationannouncement.R;
+import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 
 public class TrackingService extends Service {
 
@@ -38,23 +43,41 @@ public class TrackingService extends Service {
     private TrackingController trackingController;
 
     private static Notification createNotification(Context context) {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, MainApplication.PRIMARY_CHANNEL)
-                .setSmallIcon(R.drawable.ic_launcher_background)
-                .setPriority(NotificationCompat.PRIORITY_LOW)
-                .setCategory(Notification.CATEGORY_SERVICE);
-        Intent intent;
-        /*if (!BuildConfig.HIDDEN_APP) {
-            intent = new Intent(context, MainActivity.class);
-            builder
-                .setContentTitle(context.getString(R.string.settings_status_on_summary))
-                .setTicker(context.getString(R.string.settings_status_on_summary))
-                .setColor(ContextCompat.getColor(context, R.color.primary_dark));
-        } else {*/
-        intent = new Intent(android.provider.Settings.ACTION_SETTINGS);
-        /*}*/
-        builder.setContentIntent(PendingIntent.getActivity(context, 0, intent, 0));
-        return builder.build();
+        Notification notify;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, MainApplication.PRIMARY_CHANNEL)
+                    .setSmallIcon(R.drawable.ic_launcher_background)
+                    .setPriority(NotificationCompat.PRIORITY_LOW)
+                    .setCategory(Notification.CATEGORY_SERVICE);
+            Intent intent;
+            intent = new Intent(android.provider.Settings.ACTION_SETTINGS);
+            builder.setContentIntent(PendingIntent.getActivity(context, 0, intent, 0));
+            notify = builder.build();
+        } else {
+            String NOTIFICATION_CHANNEL_ID = "buslocation";
+            String channelName = "Buslocation background service";
+            NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
+            chan.setLightColor(Color.BLUE);
+            chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+            NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            assert manager != null;
+            manager.createNotificationChannel(chan);
+
+            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID);
+            Notification notification = notificationBuilder.setOngoing(true)
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentTitle("Getting Your Location")
+                    .setPriority(NotificationManager.IMPORTANCE_MIN)
+                    .setCategory(Notification.CATEGORY_SERVICE)
+                    .build();
+            notify = notification;
+        }
+
+        return notify;
+
+
     }
+
 
     public static class HideNotificationService extends Service {
         @Override
@@ -86,9 +109,9 @@ public class TrackingService extends Service {
             trackingController = new TrackingController(this);
             trackingController.start();
         }
-
         startForeground(NOTIFICATION_ID, createNotification(this));
         ContextCompat.startForegroundService(this, new Intent(this, HideNotificationService.class));
+
     }
 
     @Override
@@ -125,8 +148,8 @@ public class TrackingService extends Service {
 
         }
 
-        stopForeground(true);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            stopForeground(true);
 
         }
 

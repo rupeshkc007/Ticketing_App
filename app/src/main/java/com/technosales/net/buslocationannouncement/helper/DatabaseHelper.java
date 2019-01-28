@@ -284,6 +284,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String sql = "DELETE FROM " + TICKET_TABLE + " WHERE id<=" + id;
         Log.i("deleteFromLocal", "" + sql);
         getWritableDatabase().execSQL(sql);
+        context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.DATA_SENDING, false).apply();
 
     }
 

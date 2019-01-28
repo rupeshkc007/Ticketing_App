@@ -1,6 +1,7 @@
 package com.technosales.net.buslocationannouncement.network;
 
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,8 +25,11 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 public class RegisterDevice {
+    private static ProgressDialog progressDialog;
+
     public static void RegisterDevice(final Context context, String device_no) {
         Map<String, Object> params = new HashMap<>();
         params.put("deviceId", device_no);
@@ -48,7 +52,7 @@ public class RegisterDevice {
                                 for (int i = 0; i < data.length(); i++) {
                                     try {
                                         JSONObject route = data.getJSONObject(i);
-                                        routeList.add(route.getString("route_id"));
+                                        routeList.add(route.getString("route_id") + "(" + route.optString("route_nepali") + ")");
                                     } catch (JSONException e) {
                                         e.printStackTrace();
                                     }
@@ -65,8 +69,16 @@ public class RegisterDevice {
                                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                     @Override
                                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                                        RouteStation.getRouteStation(context, adapter.getItem(i));
 
+                                        StringTokenizer stringTokenizer = new StringTokenizer(adapter.getItem(i), "(");
+
+                                        dialog.dismiss();
+                                        progressDialog = new ProgressDialog(context);
+                                        progressDialog.setMessage("Please Wait");
+                                        progressDialog.setCancelable(false);
+                                        progressDialog.show();
+                                        RouteStation.getRouteStation(context, stringTokenizer.nextToken(), progressDialog);
+                                        context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.ROUTE_NAME, stringTokenizer.nextToken().replace(")", "")).apply();
                                     }
                                 });
 
@@ -75,7 +87,13 @@ public class RegisterDevice {
                                 dialog.setCancelable(true);
                                 dialog.show();
                             } else {
-                                RouteStation.getRouteStation(context, data.optJSONObject(0).optString("route_id"));
+                                progressDialog = new ProgressDialog(context);
+                                progressDialog.setMessage("Please Wait");
+                                progressDialog.setCancelable(false);
+                                progressDialog.show();
+                                RouteStation.getRouteStation(context, data.optJSONObject(0).optString("route_id"), progressDialog);
+                                context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.ROUTE_NAME, data.optJSONObject(0).optString("route_nepali")).apply();
+
                             }
                         }
                     }

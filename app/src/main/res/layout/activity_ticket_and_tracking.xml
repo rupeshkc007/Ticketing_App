@@ -6,11 +6,21 @@
     android:layout_height="match_parent"
     tools:context=".activity.TicketAndTracking">
 
+    <TextView
+        android:id="@+id/route_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimaryDark"
+        android:padding="10dp"
+        android:textColor="@android:color/white"
+        android:textSize="20sp" />
+
     <com.github.angads25.toggle.LabeledSwitch
         android:id="@+id/normalDiscountToggle"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
+        android:layout_below="@+id/route_name"
         android:layout_margin="10dp"
         android:textSize="25sp"
         app:colorBorder="#2403fc"
@@ -20,21 +30,20 @@
         android:id="@+id/priceListView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/normalDiscountToggle"
         android:layout_above="@+id/totalCollectionTickets"
-        android:overScrollMode="never"/>
+        android:layout_below="@+id/normalDiscountToggle"
+        android:overScrollMode="never" />
 
     <TextView
+        android:id="@+id/totalCollectionTickets"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_gravity="bottom"
         android:background="@android:color/black"
-        android:textColor="@android:color/white"
-        android:textSize="25sp"
         android:textAlignment="center"
-        android:id="@+id/totalCollectionTickets"/>
-
+        android:textColor="@android:color/white"
+        android:textSize="25sp" />
 
 
 </RelativeLayout>

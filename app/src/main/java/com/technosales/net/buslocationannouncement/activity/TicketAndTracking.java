@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -17,6 +18,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.github.angads25.toggle.LabeledSwitch;
@@ -55,6 +57,7 @@ public class TicketAndTracking extends AppCompatActivity {
     private RecyclerView priceListView;
     public LabeledSwitch normalDiscountToggle;
     private TextView totalCollectionTickets;
+    private TextView route_name;
 
 
     @Override
@@ -78,6 +81,8 @@ public class TicketAndTracking extends AppCompatActivity {
         priceListView = findViewById(R.id.priceListView);
         normalDiscountToggle = findViewById(R.id.normalDiscountToggle);
         totalCollectionTickets = findViewById(R.id.totalCollectionTickets);
+        route_name = findViewById(R.id.route_name);
+        route_name.setText(getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.ROUTE_NAME, ""));
 
         normalDiscountToggle.setLabelOn(getString(R.string.discount_rate));
         normalDiscountToggle.setLabelOff(getString(R.string.normal_rate));
@@ -123,6 +128,7 @@ public class TicketAndTracking extends AppCompatActivity {
                 getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().remove(UtilStrings.TOTAL_TICKETS).apply();
                 getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().remove(UtilStrings.TOTAL_COLLECTIONS).apply();
                 setTotal();
+                stopTrackingService();
             }
         });
 
@@ -162,9 +168,7 @@ public class TicketAndTracking extends AppCompatActivity {
             ContextCompat.startForegroundService(this, new Intent(this, TrackingService.class));
             alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                     ALARM_MANAGER_INTERVAL, ALARM_MANAGER_INTERVAL, alarmIntent);
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
 
-            }
         } else {
 
         }
@@ -189,4 +193,7 @@ public class TicketAndTracking extends AppCompatActivity {
             startTrackingService(false, granted);
         }
     }
+
+
+
 }

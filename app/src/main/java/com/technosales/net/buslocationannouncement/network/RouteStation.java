@@ -1,5 +1,6 @@
 package com.technosales.net.buslocationannouncement.network;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 
@@ -20,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RouteStation {
-    public static void getRouteStation(final Context context, final String routeId) {
+    public static void getRouteStation(final Context context, final String routeId, final ProgressDialog progressDialog) {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("routeId", routeId);
         AQuery aQuery = new AQuery(context);
@@ -52,6 +53,7 @@ public class RouteStation {
 
                         }
                     }
+                    progressDialog.dismiss();
                     context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.ROUTE_ID, routeId).apply();
                     /*context.startActivity(new Intent(context, AnnounceActivity.class));*/
                     context.startActivity(new Intent(context, TicketAndTracking.class));
