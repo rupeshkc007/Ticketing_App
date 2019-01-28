@@ -140,8 +140,8 @@ public class AnnounceActivity extends AppCompatActivity implements MapboxMap.OnM
         if (permission) {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
 
-                ContextCompat.startForegroundService(this, new Intent(this, TrackingService.class));
             }
+            ContextCompat.startForegroundService(this, new Intent(this, TrackingService.class));
             alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,
                     ALARM_MANAGER_INTERVAL, ALARM_MANAGER_INTERVAL, alarmIntent);
         } else {

@@ -351,6 +351,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     }
 
+    public int lastStation(String stationId) {
+        int station = 0;
+        String sql = "SELECT " + STATION_ORDER + " FROM " + ROUTE_STATION_TABLE + " WHERE " + STATION_ID + " ='" + stationId + "'";
+        Cursor c = getWritableDatabase().rawQuery(sql, null);
+        while (c.moveToNext()) {
+
+            station = c.getInt(c.getColumnIndex(STATION_ORDER));
+
+        }
+        c.close();
+        return station;
+
+    }
+
     public int getDouble(String stationId) {
 
         SQLiteDatabase db = this.getWritableDatabase();

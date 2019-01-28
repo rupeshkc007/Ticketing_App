@@ -134,10 +134,14 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
                             } else {
                                 nextStation = databaseHelper.nextStation(currentOrder + 1);
                             }
+                        } else if (preOrder > currentOrder && databaseHelper.lastStation(currentOrderId) == routeStationLists.size()) {
+                            nextStation = databaseHelper.nextStation(currentOrder - 1);
                         } else {
                             if (databaseHelper.getDouble(routeStationList.station_id) > 1) {
+
                                 currentOrder = databaseHelper.nextStationId(routeStationList.station_id);
                                 nextStation = databaseHelper.nextStation(currentOrder + 1);
+
                             } else {
                                 if (currentOrder != 1) {
                                     nextStation = databaseHelper.nextStation(currentOrder - 1);
@@ -161,7 +165,7 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
             context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LATITUDE, String.valueOf(position.getLatitude())).apply();
             context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LONGITUDE, String.valueOf(position.getLongitude())).apply();
 
-            Log.v("Location", "pos :" + position.getLatitude()+","+position.getLongitude());
+            Log.v("Location", "pos :" + position.getLatitude() + "," + position.getLongitude());
         }
     }
 
