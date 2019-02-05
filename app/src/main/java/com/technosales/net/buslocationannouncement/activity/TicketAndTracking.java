@@ -7,38 +7,60 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.TextView;
 
 import com.github.angads25.toggle.LabeledSwitch;
 import com.github.angads25.toggle.interfaces.OnToggledListener;
+import com.rt.printerlibrary.bean.UsbConfigBean;
+import com.rt.printerlibrary.cmd.Cmd;
+import com.rt.printerlibrary.cmd.EscFactory;
+import com.rt.printerlibrary.connect.PrinterInterface;
+import com.rt.printerlibrary.enumerate.CommonEnum;
+import com.rt.printerlibrary.enumerate.ESCFontTypeEnum;
+import com.rt.printerlibrary.enumerate.SettingEnum;
+import com.rt.printerlibrary.factory.cmd.CmdFactory;
+import com.rt.printerlibrary.factory.connect.PIFactory;
+import com.rt.printerlibrary.factory.connect.UsbFactory;
+import com.rt.printerlibrary.factory.printer.PrinterFactory;
+import com.rt.printerlibrary.factory.printer.ThermalPrinterFactory;
+import com.rt.printerlibrary.factory.printer.UniversalPrinterFactory;
+import com.rt.printerlibrary.observer.PrinterObserver;
+import com.rt.printerlibrary.observer.PrinterObserverManager;
+import com.rt.printerlibrary.printer.RTPrinter;
+import com.rt.printerlibrary.setting.TextSetting;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.adapter.PriceAdapter;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.pojo.PriceList;
-import com.technosales.net.buslocationannouncement.printer.ConnectUsbPrinter;
-import com.technosales.net.buslocationannouncement.printer.app.BaseActivity;
+import com.technosales.net.buslocationannouncement.printer.UsbDeviceChooseDialog;
+import com.technosales.net.buslocationannouncement.printer.apps.BaseActivity;
+import com.technosales.net.buslocationannouncement.printer.apps.BaseApplication;
+import com.technosales.net.buslocationannouncement.printer.utils.BaseEnum;
 import com.technosales.net.buslocationannouncement.trackcar.AutostartReceiver;
 import com.technosales.net.buslocationannouncement.trackcar.TrackingController;
 import com.technosales.net.buslocationannouncement.trackcar.TrackingService;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_DEVICE;
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_URL;
 
-public class TicketAndTracking extends AppCompatActivity {
+public class TicketAndTracking extends BaseActivity implements PrinterObserver {
 
     private static final int PERMISSIONS_REQUEST_LOCATION = 2;
     private static final int ALARM_MANAGER_INTERVAL = 15000;
@@ -52,6 +74,15 @@ public class TicketAndTracking extends AppCompatActivity {
     public LabeledSwitch normalDiscountToggle;
     private TextView totalCollectionTickets;
     private TextView route_name;
+
+
+    /////
+    private int checkedConType = BaseEnum.CON_USB;
+    private PrinterFactory printerFactory;
+    private RTPrinter rtPrinter;
+    private PrinterInterface curPrinterInterface = null;
+    public Object configObj;
+    public UsbDeviceChooseDialog usbDeviceChooseDialog;
 
 
     @Override
@@ -70,7 +101,6 @@ public class TicketAndTracking extends AppCompatActivity {
         databaseHelper = new DatabaseHelper(this);
         new TrackingController(this);
         startTrackingService(true, false);
-        new ConnectUsbPrinter(this);
 
         /**/
         priceListView = findViewById(R.id.priceListView);
@@ -128,6 +158,81 @@ public class TicketAndTracking extends AppCompatActivity {
         });
 
         setTotal();
+
+        setEscPrint();
+        showUSBDeviceChooseDialog();
+    }
+
+    private void showUSBDeviceChooseDialog() {
+        usbDeviceChooseDialog = new UsbDeviceChooseDialog();
+        usbDeviceChooseDialog.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                UsbDevice mUsbDevice = (UsbDevice) parent.getAdapter().getItem(position);
+                PendingIntent mPermissionIntent = PendingIntent.getBroadcast(
+                        TicketAndTracking.this,
+                        0,
+                        new Intent(TicketAndTracking.this.getApplicationInfo().packageName),
+                        0);
+/*
+                tv_device_selected.setText(getString(R.string.adapter_usbdevice) + mUsbDevice.getDeviceId()); //+ (position + 1));
+*/
+                configObj = new UsbConfigBean(BaseApplication.getInstance(), mUsbDevice, mPermissionIntent);
+                /*tv_device_selected.setTag(BaseEnum.HAS_DEVICE);
+                isConfigPrintEnable(configObj);*/
+                usbDeviceChooseDialog.dismiss();
+
+                doConnect();
+            }
+        });
+        usbDeviceChooseDialog.show(getFragmentManager(), null);
+    }
+
+    public void doConnect() {
+        UsbConfigBean usbConfigBean = (UsbConfigBean) configObj;
+        connectUSB(usbConfigBean);
+    }
+
+    private void connectUSB(UsbConfigBean usbConfigBean) {
+        UsbManager mUsbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+        PIFactory piFactory = new UsbFactory();
+        PrinterInterface printerInterface = piFactory.create();
+        printerInterface.setConfigObject(usbConfigBean);
+        rtPrinter.setPrinterInterface(printerInterface);
+
+        if (mUsbManager.hasPermission(usbConfigBean.usbDevice)) {
+            try {
+                rtPrinter.connect(usbConfigBean);
+                BaseApplication.instance.setRtPrinter(rtPrinter);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            mUsbManager.requestPermission(usbConfigBean.usbDevice, usbConfigBean.pendingIntent);
+        }
+
+
+    }
+
+    @Override
+    public void initView() {
+
+    }
+
+    @Override
+    public void addListener() {
+
+    }
+
+    @Override
+    public void init() {
+        BaseApplication.instance.setCurrentCmdType(BaseEnum.CMD_ESC);
+        printerFactory = new UniversalPrinterFactory();
+        rtPrinter = printerFactory.create();
+
+        /*tv_ver.setText("PrinterExample Ver: v" + TonyUtils.getVersionName(this));*/
+        PrinterObserverManager.getInstance().add(this);//添加连接状态监听
+
     }
 
     public void setPriceLists(int min) {
@@ -190,4 +295,54 @@ public class TicketAndTracking extends AppCompatActivity {
     }
 
 
+    @Override
+    public void printerObserverCallback(PrinterInterface printerInterface, int i) {
+
+    }
+
+    @Override
+    public void printerReadMsgCallback(PrinterInterface printerInterface, byte[] bytes) {
+
+    }
+
+    private void setEscPrint() {
+        /*BaseApplication.instance.setCurrentCmdType(BaseEnum.CMD_ESC);*/
+        printerFactory = new ThermalPrinterFactory();
+        rtPrinter = printerFactory.create();
+        rtPrinter.setPrinterInterface(curPrinterInterface);
+    }
+
+    public void escPrint(String ticketNumber) throws UnsupportedEncodingException {
+        rtPrinter = BaseApplication.getInstance().getRtPrinter();
+        if (rtPrinter != null) {
+            CmdFactory escFac = new EscFactory();
+            Cmd escCmd = escFac.create();
+            escCmd.append(escCmd.getHeaderCmd());//初始化, Initial
+
+            escCmd.setChartsetName("UTF-8");
+
+            TextSetting textSetting = new TextSetting();
+
+            textSetting.setAlign(CommonEnum.ALIGN_MIDDLE);//对齐方式-左对齐，居中，右对齐
+            textSetting.setBold(SettingEnum.Disable);
+            textSetting.setUnderline(SettingEnum.Disable);
+            textSetting.setIsAntiWhite(SettingEnum.Disable);
+            textSetting.setDoubleHeight(SettingEnum.Disable);
+            textSetting.setDoubleWidth(SettingEnum.Disable);
+
+            textSetting.setEscFontType(ESCFontTypeEnum.FONT_A_12x24);
+
+            escCmd.append(escCmd.getTextCmd(textSetting, ticketNumber, "UTF-8"));
+
+            escCmd.append(escCmd.getLFCRCmd());
+            escCmd.append(escCmd.getLFCRCmd());
+            escCmd.append(escCmd.getLFCRCmd());
+            escCmd.append(escCmd.getLFCRCmd());
+            escCmd.append(escCmd.getLFCRCmd());
+            escCmd.append(escCmd.getHeaderCmd());//初始化, Initial
+            escCmd.append(escCmd.getLFCRCmd());
+
+            rtPrinter.writeMsgAsync(escCmd.getAppendCmds());
+        }
+    }
 }

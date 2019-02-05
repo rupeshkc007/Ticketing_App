@@ -21,6 +21,7 @@
     <uses-feature android:name="android.hardware.location.gps" />
 
     <application
+        android:name=".printer.apps.BaseApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -86,6 +87,7 @@
             <meta-data
                 android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/device_filter" />
+
         </activity>
     </application>
 

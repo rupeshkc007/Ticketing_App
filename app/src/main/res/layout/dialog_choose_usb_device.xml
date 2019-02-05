@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/black"
+        android:padding="16dp"
+        android:text="@string/choose_usb_device"
+        android:textColor="@android:color/holo_orange_dark" />
+
+    <ListView
+        android:id="@+id/lv_dialog_choose_usb_device"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="1dp" />
+
+    <TextView
+        android:id="@+id/tv_dialog_choose_usb_device_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:text="@string/tip_insert_usb_device"
+        android:textColor="#7f7f7f"
+        android:visibility="gone" />
+
+</LinearLayout>

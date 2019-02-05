@@ -5,21 +5,16 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.pojo.PriceList;
 import com.technosales.net.buslocationannouncement.pojo.TicketInfoList;
-import com.technosales.net.buslocationannouncement.printer.ConnectUsbPrinter;
-import com.technosales.net.buslocationannouncement.printer.TextPrinter;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
 
@@ -111,10 +106,14 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
 
                 databaseHelper.insertTicketInfo(ticketInfoList);
                 try {
-                    new ConnectUsbPrinter(context).escPrint();
+                    ((TicketAndTracking) context).escPrint("TICKET No.:"+ticketInfoList.ticketNumber + "\n" +
+                            "Rs." + ticketInfoList.ticketPrice + "\n" +
+                            GeneralUtils.getFullDate() + "\n" + GeneralUtils.getTime());
+//                    ((TicketAndTracking) context).escPrint(GeneralUtils.getUnicodeNumber(Integer.parseInt(ticketInfoList.ticketNumber)) );
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
+
 
                 /*Log.i("TicketInfoSize", "" + String.valueOf(databaseHelper.ticketInfoLists().size()));*/
 
