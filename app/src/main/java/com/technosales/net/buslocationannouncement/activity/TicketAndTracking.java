@@ -8,17 +8,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.github.angads25.toggle.LabeledSwitch;
@@ -27,17 +24,14 @@ import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.adapter.PriceAdapter;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.pojo.PriceList;
+import com.technosales.net.buslocationannouncement.printer.ConnectUsbPrinter;
+import com.technosales.net.buslocationannouncement.printer.app.BaseActivity;
 import com.technosales.net.buslocationannouncement.trackcar.AutostartReceiver;
 import com.technosales.net.buslocationannouncement.trackcar.TrackingController;
 import com.technosales.net.buslocationannouncement.trackcar.TrackingService;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,6 +70,7 @@ public class TicketAndTracking extends AppCompatActivity {
         databaseHelper = new DatabaseHelper(this);
         new TrackingController(this);
         startTrackingService(true, false);
+        new ConnectUsbPrinter(this);
 
         /**/
         priceListView = findViewById(R.id.priceListView);
@@ -94,7 +89,6 @@ public class TicketAndTracking extends AppCompatActivity {
         priceListView.setLayoutManager(gridLayoutManager);
         priceListView.setHasFixedSize(true);
 
-
         priceLists = databaseHelper.priceLists(4);
         if (priceLists.size() == 0) {
             priceLists = GeneralUtils.priceCsv(this);
@@ -105,6 +99,7 @@ public class TicketAndTracking extends AppCompatActivity {
         normalDiscountToggle.setOnToggledListener(new OnToggledListener() {
             @Override
             public void onSwitched(LabeledSwitch labeledSwitch, boolean isOn) {
+
                 if (isOn) {
                     setPriceLists(0);
                 } else {
@@ -128,7 +123,7 @@ public class TicketAndTracking extends AppCompatActivity {
                 getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().remove(UtilStrings.TOTAL_TICKETS).apply();
                 getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().remove(UtilStrings.TOTAL_COLLECTIONS).apply();
                 setTotal();
-                stopTrackingService();
+                databaseHelper.clearAllFromData();
             }
         });
 
@@ -193,7 +188,6 @@ public class TicketAndTracking extends AppCompatActivity {
             startTrackingService(false, granted);
         }
     }
-
 
 
 }

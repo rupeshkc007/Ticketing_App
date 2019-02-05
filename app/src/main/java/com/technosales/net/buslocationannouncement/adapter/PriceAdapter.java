@@ -18,9 +18,12 @@ import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.pojo.PriceList;
 import com.technosales.net.buslocationannouncement.pojo.TicketInfoList;
+import com.technosales.net.buslocationannouncement.printer.ConnectUsbPrinter;
+import com.technosales.net.buslocationannouncement.printer.TextPrinter;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder> {
@@ -65,6 +68,8 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
         holder.price_value.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+
                 preferences = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0);
                 databaseHelper = new DatabaseHelper(context);
                 total_tickets = preferences.getInt(UtilStrings.TOTAL_TICKETS, 0);
@@ -105,6 +110,11 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
 
 
                 databaseHelper.insertTicketInfo(ticketInfoList);
+                try {
+                    new ConnectUsbPrinter(context).escPrint();
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
 
                 /*Log.i("TicketInfoSize", "" + String.valueOf(databaseHelper.ticketInfoLists().size()));*/
 

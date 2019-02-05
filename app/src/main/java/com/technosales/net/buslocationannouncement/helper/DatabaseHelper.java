@@ -288,6 +288,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     }
 
+    public void clearAllFromData() {
+        String sql = "DELETE FROM " + TICKET_TABLE ;
+        getWritableDatabase().execSQL(sql);
+    }
+
     public List<PriceList> priceLists(int id) {
         List<PriceList> priceLists = new ArrayList<>();
 
