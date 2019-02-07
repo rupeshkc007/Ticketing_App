@@ -3,6 +3,7 @@ package com.technosales.net.buslocationannouncement.activity;
 import android.Manifest;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -22,6 +23,7 @@ import android.widget.TextView;
 
 import com.github.angads25.toggle.LabeledSwitch;
 import com.github.angads25.toggle.interfaces.OnToggledListener;
+import com.rt.printerlibrary.bean.BluetoothEdrConfigBean;
 import com.rt.printerlibrary.bean.UsbConfigBean;
 import com.rt.printerlibrary.cmd.Cmd;
 import com.rt.printerlibrary.cmd.EscFactory;
@@ -30,6 +32,7 @@ import com.rt.printerlibrary.enumerate.CommonEnum;
 import com.rt.printerlibrary.enumerate.ESCFontTypeEnum;
 import com.rt.printerlibrary.enumerate.SettingEnum;
 import com.rt.printerlibrary.factory.cmd.CmdFactory;
+import com.rt.printerlibrary.factory.connect.BluetoothFactory;
 import com.rt.printerlibrary.factory.connect.PIFactory;
 import com.rt.printerlibrary.factory.connect.UsbFactory;
 import com.rt.printerlibrary.factory.printer.PrinterFactory;
@@ -43,6 +46,7 @@ import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.adapter.PriceAdapter;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.pojo.PriceList;
+import com.technosales.net.buslocationannouncement.printer.BluetoothDeviceChooseDialog;
 import com.technosales.net.buslocationannouncement.printer.UsbDeviceChooseDialog;
 import com.technosales.net.buslocationannouncement.printer.apps.BaseActivity;
 import com.technosales.net.buslocationannouncement.printer.apps.BaseApplication;
@@ -83,6 +87,7 @@ public class TicketAndTracking extends BaseActivity implements PrinterObserver {
     private PrinterInterface curPrinterInterface = null;
     public Object configObj;
     public UsbDeviceChooseDialog usbDeviceChooseDialog;
+    public BluetoothDeviceChooseDialog bluetoothDeviceChooseDialog;
 
 
     @Override
@@ -160,8 +165,23 @@ public class TicketAndTracking extends BaseActivity implements PrinterObserver {
         setTotal();
 
         setEscPrint();
-        showUSBDeviceChooseDialog();
+        /*showUSBDeviceChooseDialog();*/
+        showBluetoothDeviceChooseDialog();
     }
+
+    private void showBluetoothDeviceChooseDialog() {
+        bluetoothDeviceChooseDialog = new BluetoothDeviceChooseDialog();
+        bluetoothDeviceChooseDialog.setOnDeviceItemClickListener(new BluetoothDeviceChooseDialog.onDeviceItemClickListener() {
+            @Override
+            public void onDeviceItemClick(BluetoothDevice device) {
+
+                /*configObj = new BluetoothEdrConfigBean(device);
+                connectBlueTh();*/
+            }
+        });
+        bluetoothDeviceChooseDialog.show(TicketAndTracking.this.getFragmentManager(), null);
+    }
+
 
     private void showUSBDeviceChooseDialog() {
         usbDeviceChooseDialog = new UsbDeviceChooseDialog();
@@ -186,6 +206,27 @@ public class TicketAndTracking extends BaseActivity implements PrinterObserver {
             }
         });
         usbDeviceChooseDialog.show(getFragmentManager(), null);
+    }
+
+    public void connectBlueTh() {
+        BluetoothEdrConfigBean bluetoothEdrConfigBean = (BluetoothEdrConfigBean) configObj;
+        connectBluetooth(bluetoothEdrConfigBean);
+    }
+
+    private void connectBluetooth(BluetoothEdrConfigBean bluetoothEdrConfigBean) {
+        PIFactory piFactory = new BluetoothFactory();
+        PrinterInterface printerInterface  = piFactory.create();
+        printerInterface.setConfigObject(bluetoothEdrConfigBean);
+        rtPrinter.setPrinterInterface(printerInterface);
+        try {
+            rtPrinter.connect(bluetoothEdrConfigBean);
+            BaseApplication.instance.setRtPrinter(rtPrinter);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+
+        }
+
     }
 
     public void doConnect() {

@@ -1,16 +1,22 @@
 package com.technosales.net.buslocationannouncement.printer;
 
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import com.rt.printerlibrary.bean.UsbConfigBean;
+import com.rt.printerlibrary.bean.WiFiConfigBean;
 import com.rt.printerlibrary.cmd.Cmd;
 import com.rt.printerlibrary.cmd.EscFactory;
 import com.rt.printerlibrary.connect.PrinterInterface;
@@ -31,6 +37,7 @@ import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.printer.apps.BaseActivity;
 import com.technosales.net.buslocationannouncement.printer.apps.BaseApplication;
 import com.technosales.net.buslocationannouncement.printer.utils.BaseEnum;
+import com.technosales.net.buslocationannouncement.printer.utils.SPUtils;
 
 import java.io.UnsupportedEncodingException;
 public class PrintingMain extends BaseActivity implements View.OnClickListener, PrinterObserver {
@@ -53,8 +60,16 @@ public class PrintingMain extends BaseActivity implements View.OnClickListener, 
         init();
 
         setEscPrint();
-        showUSBDeviceChooseDialog();
+
+
+        /*showWifiChooseDialog();*/
+        /*showUSBDeviceChooseDialog();*/
     }
+/////////////////////////////////////
+
+
+
+/////////////////////////////////////
 
     private void showUSBDeviceChooseDialog() {
         final UsbDeviceChooseDialog usbDeviceChooseDialog = new UsbDeviceChooseDialog();
