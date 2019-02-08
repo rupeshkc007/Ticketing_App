@@ -25,6 +25,7 @@ public class TicketInfoDataPush {
         if (GeneralUtils.isNetworkAvailable(context)) {
             Map<String, Object> params = new HashMap<>();
             params.put("data", ticketInfoObject);
+            params.put("device_id",context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES,0).getString(UtilStrings.DEVICE_ID,""));
             Log.i("getParams", "" + params);
             JSONArray data = ticketInfoObject.optJSONArray("data");
             String tickId = "";

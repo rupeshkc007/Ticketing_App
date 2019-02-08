@@ -71,7 +71,7 @@ public class AnnounceActivity extends AppCompatActivity implements MapboxMap.OnM
 
         databaseHelper = new DatabaseHelper(this);
         textToVoice = new TextToVoice(this);
-        textToVoice.initTTs();
+        /*textToVoice.initTTs();*/
 
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override

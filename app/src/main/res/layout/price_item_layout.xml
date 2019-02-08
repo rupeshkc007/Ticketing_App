@@ -11,7 +11,8 @@
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
         app:cardElevation="5dp"
-        app:cardCornerRadius="25dp">
+        app:cardCornerRadius="25dp"
+        android:id="@+id/priceCard">
 
         <TextView
             android:id="@+id/price_value"

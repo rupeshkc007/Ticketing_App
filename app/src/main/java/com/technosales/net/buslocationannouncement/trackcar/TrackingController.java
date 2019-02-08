@@ -79,7 +79,6 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
         positionProvider = new PositionProvider(context, this);
         databaseHelper = new DatabaseHelper(context);
         textToVoice = new TextToVoice(context);
-        textToVoice.initTTs();
         networkManager = new NetworkManager(context, this);
         isOnline = networkManager.isOnline();
 
@@ -165,7 +164,7 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
             context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LATITUDE, String.valueOf(position.getLatitude())).apply();
             context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LONGITUDE, String.valueOf(position.getLongitude())).apply();
 
-            Log.v("Location", "pos :" + position.getLatitude() + "," + position.getLongitude());
+            Log.v("nearest", "pos :" + position.getLatitude() + "," + position.getLongitude());
         }
     }
 

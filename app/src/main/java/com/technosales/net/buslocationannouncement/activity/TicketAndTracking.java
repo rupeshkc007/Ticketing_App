@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Build;
@@ -24,13 +25,19 @@ import android.widget.TextView;
 import com.github.angads25.toggle.LabeledSwitch;
 import com.github.angads25.toggle.interfaces.OnToggledListener;
 import com.rt.printerlibrary.bean.BluetoothEdrConfigBean;
+import com.rt.printerlibrary.bean.LableSizeBean;
+import com.rt.printerlibrary.bean.Position;
 import com.rt.printerlibrary.bean.UsbConfigBean;
 import com.rt.printerlibrary.cmd.Cmd;
 import com.rt.printerlibrary.cmd.EscFactory;
+import com.rt.printerlibrary.cmd.TscFactory;
 import com.rt.printerlibrary.connect.PrinterInterface;
+import com.rt.printerlibrary.enumerate.BmpPrintMode;
 import com.rt.printerlibrary.enumerate.CommonEnum;
 import com.rt.printerlibrary.enumerate.ESCFontTypeEnum;
+import com.rt.printerlibrary.enumerate.PrintDirection;
 import com.rt.printerlibrary.enumerate.SettingEnum;
+import com.rt.printerlibrary.exception.SdkException;
 import com.rt.printerlibrary.factory.cmd.CmdFactory;
 import com.rt.printerlibrary.factory.connect.BluetoothFactory;
 import com.rt.printerlibrary.factory.connect.PIFactory;
@@ -41,6 +48,8 @@ import com.rt.printerlibrary.factory.printer.UniversalPrinterFactory;
 import com.rt.printerlibrary.observer.PrinterObserver;
 import com.rt.printerlibrary.observer.PrinterObserverManager;
 import com.rt.printerlibrary.printer.RTPrinter;
+import com.rt.printerlibrary.setting.BitmapSetting;
+import com.rt.printerlibrary.setting.CommonSetting;
 import com.rt.printerlibrary.setting.TextSetting;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.adapter.PriceAdapter;
@@ -88,6 +97,9 @@ public class TicketAndTracking extends BaseActivity implements PrinterObserver {
     public Object configObj;
     public UsbDeviceChooseDialog usbDeviceChooseDialog;
     public BluetoothDeviceChooseDialog bluetoothDeviceChooseDialog;
+
+    private int bmpPrintWidth = 40;
+    public Bitmap mBitmap;
 
 
     @Override
@@ -166,6 +178,8 @@ public class TicketAndTracking extends BaseActivity implements PrinterObserver {
 
         setEscPrint();
         /*showUSBDeviceChooseDialog();*/
+
+
         showBluetoothDeviceChooseDialog();
     }
 
@@ -215,7 +229,7 @@ public class TicketAndTracking extends BaseActivity implements PrinterObserver {
 
     private void connectBluetooth(BluetoothEdrConfigBean bluetoothEdrConfigBean) {
         PIFactory piFactory = new BluetoothFactory();
-        PrinterInterface printerInterface  = piFactory.create();
+        PrinterInterface printerInterface = piFactory.create();
         printerInterface.setConfigObject(bluetoothEdrConfigBean);
         rtPrinter.setPrinterInterface(printerInterface);
         try {
@@ -287,7 +301,7 @@ public class TicketAndTracking extends BaseActivity implements PrinterObserver {
         int totalTickets = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.TOTAL_TICKETS, 0);
         int totalCollections = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.TOTAL_COLLECTIONS, 0);
 //        totalCollectionTickets.setText("Total Tickets :" + String.valueOf(totalTickets) + "\n Total Colletions :" + String.valueOf(totalCollections));
-        totalCollectionTickets.setText(getString(R.string.total_tickets) + GeneralUtils.getUnicodeNumber(totalTickets) + "\n" + getString(R.string.total_collections) + GeneralUtils.getUnicodeNumber(totalCollections));
+        totalCollectionTickets.setText(getString(R.string.total_tickets) + GeneralUtils.getUnicodeNumber(String.valueOf(totalTickets)) + "\n" + getString(R.string.total_collections) + GeneralUtils.getUnicodeNumber(String.valueOf(totalCollections)));
 
 
     }
@@ -386,4 +400,47 @@ public class TicketAndTracking extends BaseActivity implements PrinterObserver {
             rtPrinter.writeMsgAsync(escCmd.getAppendCmds());
         }
     }
+
+
+    public void escImgPrint() throws SdkException {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+
+                CmdFactory cmdFactory = new EscFactory();
+                Cmd cmd = cmdFactory.create();
+                cmd.append(cmd.getHeaderCmd());
+
+                CommonSetting commonSetting = new CommonSetting();
+                commonSetting.setAlign(CommonEnum.ALIGN_MIDDLE);
+                commonSetting.setEscLineSpacing(10);
+                cmd.append(cmd.getCommonSettingCmd(commonSetting));
+
+                BitmapSetting bitmapSetting = new BitmapSetting();
+                bitmapSetting.setBmpPrintMode(BmpPrintMode.MODE_SINGLE_COLOR);
+
+                bitmapSetting.setBimtapLimitWidth(bmpPrintWidth * 8);
+                try {
+                    /*Bitmap bb= Bitmap.createScaledBitmap(mBitmap, 300, 100, false);*/
+                    cmd.append(cmd.getBitmapCmd(bitmapSetting, mBitmap));
+                } catch (SdkException e) {
+                    e.printStackTrace();
+                }
+                cmd.append(cmd.getLFCRCmd());
+                cmd.append(cmd.getLFCRCmd());
+                cmd.append(cmd.getLFCRCmd());
+                cmd.append(cmd.getLFCRCmd());
+                cmd.append(cmd.getLFCRCmd());
+                cmd.append(cmd.getLFCRCmd());
+                if (rtPrinter != null) {
+                    rtPrinter.writeMsg(cmd.getAppendCmds());//Sync Write
+                }
+
+            }
+        }).start();
+
+    }
+
 }

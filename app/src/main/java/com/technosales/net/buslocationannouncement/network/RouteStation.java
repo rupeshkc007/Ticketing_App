@@ -47,6 +47,7 @@ public class RouteStation {
                                 routeStationList.station_id = dataobj.optString("station_id");
                                 routeStationList.station_order = order;
                                 routeStationList.station_name = dataobj.optString("name_nepali");
+                                routeStationList.station_name_eng = dataobj.optString("name");
                                 routeStationList.station_lat = dataobj.optString("latitude");
                                 routeStationList.station_lng = dataobj.optString("longitude");
 

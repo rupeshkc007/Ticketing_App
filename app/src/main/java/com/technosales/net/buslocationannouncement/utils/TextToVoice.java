@@ -14,6 +14,12 @@ public class TextToVoice {
 
     public TextToVoice(Context context) {
         this.context = context;
+        try {
+
+            initTTs();
+        } catch (Exception ex) {
+
+        }
     }
 
     public TextToSpeech initTTs() {

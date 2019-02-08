@@ -91,8 +91,7 @@ public class GeneralUtils {
         return df.format(c.getTime());
     }
 
-    public static String getUnicodeNumber(int intNum) {
-        String number = String.valueOf(intNum);
+    public static String getUnicodeNumber(String number) {
         String unicodeChar = "";
         for (int i = 0; i < number.length(); i++) {
             char character = number.charAt(i);

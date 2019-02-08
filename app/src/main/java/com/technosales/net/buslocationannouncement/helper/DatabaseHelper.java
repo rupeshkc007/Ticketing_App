@@ -50,6 +50,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String STATION_ID = "station_id";
     public static final String STATION_ORDER = "station_order";
     public static final String STATION_NAME = "name_nepali";
+    private static final String STATION_NAME_ENG = "name_english";
     public static final String STATION_LAT = "latitude";
     public static final String STATION_LNG = "longitude";
 
@@ -66,6 +67,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String TICKET_TIME = "ticket_time";
     public static final String TICKET_LAT = "ticket_lat";
     public static final String TICKET_LNG = "ticket_lng";
+
+    public static final String NEAREST_STATION_TABLE = "nearest_station";
+    public static final String NEAREST_STATION_NAME = "nearest_name";
+    public static final String NEAREST_STATION_DISTANCE = "nearest_distance";
     private final Context context;
 
 
@@ -148,8 +153,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 STATION_ID + " TEXT," +
                 STATION_ORDER + " INTEGER," +
                 STATION_NAME + " TEXT," +
+                STATION_NAME_ENG + " TEXT," +
                 STATION_LAT + " TEXT," +
                 STATION_LNG + " TEXT)");
+
+
     }
 
     @Override
@@ -193,12 +201,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         contentValues.put(STATION_ID, routeStationList.station_id);
         contentValues.put(STATION_ORDER, routeStationList.station_order);
         contentValues.put(STATION_NAME, routeStationList.station_name);
+        contentValues.put(STATION_NAME_ENG, routeStationList.station_name_eng);
         contentValues.put(STATION_LAT, routeStationList.station_lat);
         contentValues.put(STATION_LNG, routeStationList.station_lng);
         sqLiteDatabase.insert(ROUTE_STATION_TABLE, null, contentValues);
 
-        Log.i("routeStation", "" + routeStationList.station_order + ":" + routeStationList.station_name);
+        Log.i("routeStation", "" + routeStationList.station_order + ":" + routeStationList.station_name_eng);
     }
+
+/*    public void insertNearStations(String name, int distance) {
+        ContentValues contentValues = new ContentValues();
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        contentValues.put(NEAREST_STATION_NAME, name);
+        contentValues.put(NEAREST_STATION_NAME, distance);
+        sqLiteDatabase.insert(NEAREST_STATION_TABLE, null, contentValues);
+
+    }*/
 
     public void insertPrice(ContentValues contentValues) {
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
@@ -289,7 +307,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void clearAllFromData() {
-        String sql = "DELETE FROM " + TICKET_TABLE ;
+        String sql = "DELETE FROM " + TICKET_TABLE;
         getWritableDatabase().execSQL(sql);
     }
 
@@ -317,6 +335,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             routeStationList.station_id = c.getString(c.getColumnIndex(STATION_ID));
             routeStationList.station_order = c.getInt(c.getColumnIndex(STATION_ORDER));
             routeStationList.station_name = c.getString(c.getColumnIndex(STATION_NAME));
+            routeStationList.station_name_eng = c.getString(c.getColumnIndex(STATION_NAME_ENG));
             routeStationList.station_lat = c.getString(c.getColumnIndex(STATION_LAT));
             routeStationList.station_lng = c.getString(c.getColumnIndex(STATION_LNG));
 
