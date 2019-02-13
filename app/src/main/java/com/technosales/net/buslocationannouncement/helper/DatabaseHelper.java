@@ -27,6 +27,7 @@ import android.util.Log;
 
 import com.technosales.net.buslocationannouncement.network.RouteStation;
 import com.technosales.net.buslocationannouncement.network.TicketInfoDataPush;
+import com.technosales.net.buslocationannouncement.pojo.HelperList;
 import com.technosales.net.buslocationannouncement.pojo.PriceList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.pojo.TicketInfoList;
@@ -68,9 +69,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String TICKET_LAT = "ticket_lat";
     public static final String TICKET_LNG = "ticket_lng";
 
-    public static final String NEAREST_STATION_TABLE = "nearest_station";
-    public static final String NEAREST_STATION_NAME = "nearest_name";
-    public static final String NEAREST_STATION_DISTANCE = "nearest_distance";
+    public static final String HELPER_TABLE = "helper_table";
+    public static final String HELPER_ID = "helper_id";
+    public static final String HELPER_NAME = "helper_name";
     private final Context context;
 
 
@@ -142,6 +143,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 TICKET_DATE + " TEXT," +
                 TICKET_TIME + " TEXT," +
                 TICKET_LAT + " TEXT," +
+                HELPER_ID + " TEXT," +
                 TICKET_LNG + " TEXT)");
 
         db.execSQL("CREATE TABLE price_table (" +
@@ -156,6 +158,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 STATION_NAME_ENG + " TEXT," +
                 STATION_LAT + " TEXT," +
                 STATION_LNG + " TEXT)");
+        db.execSQL("CREATE TABLE helper_table (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                HELPER_ID + " TEXT," +
+                HELPER_NAME + " TEXT)");
 
 
     }
@@ -209,14 +215,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Log.i("routeStation", "" + routeStationList.station_order + ":" + routeStationList.station_name_eng);
     }
 
-/*    public void insertNearStations(String name, int distance) {
-        ContentValues contentValues = new ContentValues();
-        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
-        contentValues.put(NEAREST_STATION_NAME, name);
-        contentValues.put(NEAREST_STATION_NAME, distance);
-        sqLiteDatabase.insert(NEAREST_STATION_TABLE, null, contentValues);
-
-    }*/
+    public void insertHelpers(ContentValues contentValues) {
+        Log.i("helperValue", "" + contentValues.toString());
+        getWritableDatabase().insert(HELPER_TABLE, null, contentValues);
+    }
 
     public void insertPrice(ContentValues contentValues) {
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
@@ -234,13 +236,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         contentValues.put(TICKET_TIME, ticketInfoList.ticketTime);
         contentValues.put(TICKET_LAT, ticketInfoList.ticketLat);
         contentValues.put(TICKET_LNG, ticketInfoList.ticketLng);
+        contentValues.put(HELPER_ID, ticketInfoList.helper_id);
         sqLiteDatabase.insert(TICKET_TABLE, null, contentValues);
+    }
 
-        boolean datasending = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getBoolean(UtilStrings.DATA_SENDING, false);
-        if (!datasending) {
-            ticketInfoLists();
+    public List<TicketInfoList> listTickets() {
+        List<TicketInfoList> ticketInfoLists = new ArrayList<>();
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM " + TICKET_TABLE, null);
+        while (cursor.moveToNext()) {
+            TicketInfoList ticketInfoList = new TicketInfoList();
+            ticketInfoList.ticketNumber = cursor.getString(cursor.getColumnIndex(TICKET_NUMBER));
+            ticketInfoList.ticketPrice = cursor.getString(cursor.getColumnIndex(TICKET_PRICE));
+            ticketInfoList.ticketType = cursor.getString(cursor.getColumnIndex(TICKET_TYPE));
+            ticketInfoList.ticketDate = cursor.getString(cursor.getColumnIndex(TICKET_DATE));
+            ticketInfoList.ticketTime = cursor.getString(cursor.getColumnIndex(TICKET_TIME));
+            ticketInfoList.ticketLat = cursor.getString(cursor.getColumnIndex(TICKET_LAT));
+            ticketInfoList.ticketLng = cursor.getString(cursor.getColumnIndex(TICKET_LNG));
+            ticketInfoList.helper_id = cursor.getString(cursor.getColumnIndex(HELPER_ID));
+            ticketInfoLists.add(ticketInfoList);
         }
-
+        return ticketInfoLists;
 
     }
 
@@ -258,15 +274,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             ticketInfoList.ticketTime = cursor.getString(cursor.getColumnIndex(TICKET_TIME));
             ticketInfoList.ticketLat = cursor.getString(cursor.getColumnIndex(TICKET_LAT));
             ticketInfoList.ticketLng = cursor.getString(cursor.getColumnIndex(TICKET_LNG));
+            ticketInfoList.helper_id = cursor.getString(cursor.getColumnIndex(HELPER_ID));
             ticketInfoLists.add(ticketInfoList);
             id = cursor.getInt(cursor.getColumnIndex("id"));
 
         }
         cursor.close();
-
         context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putInt(UtilStrings.LAST_DATA_ID, id).apply();
         TicketInfoDataPush.pushBusData(context, getJsonData(ticketInfoLists));
     }
+
 
     public JSONObject getJsonData(List<TicketInfoList> ticketInfoLists) {
         JSONObject object = new JSONObject();
@@ -277,7 +294,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 JSONObject jsonObject = new JSONObject();
 
                 jsonObject.put("device_id", context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.DEVICE_ID, ""));
-                jsonObject.put("helper_id", "1");
+                jsonObject.put("helper_id", ticketInfoList.helper_id);
                 jsonObject.put("ticket_number", ticketInfoList.ticketNumber);
                 jsonObject.put("price", ticketInfoList.ticketPrice);
                 jsonObject.put("device_time", ticketInfoList.ticketDate + " " + ticketInfoList.ticketTime);
@@ -285,7 +302,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 jsonObject.put("latitude", ticketInfoList.ticketLat);
                 jsonObject.put("longitude", ticketInfoList.ticketLng);
                 jsonObject.put("trip", "1");
-
                 array.put(jsonObject);
 
             }
@@ -295,6 +311,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         return object;
+    }
+
+    public List<HelperList> helperLists() {
+        List<HelperList> helperLists = new ArrayList<>();
+        String sql = "SELECT * FROM " + HELPER_TABLE;
+        Cursor c = getWritableDatabase().rawQuery(sql, null);
+        while (c.moveToNext()) {
+            HelperList helperList = new HelperList();
+            helperList.helper_id = c.getString(c.getColumnIndex(HELPER_ID));
+            helperList.helper_name = c.getString(c.getColumnIndex(HELPER_NAME));
+            helperLists.add(helperList);
+        }
+        c.close();
+        return helperLists;
+    }
+
+    public void clearHelpers() {
+        getWritableDatabase().execSQL("DELETE FROM " + HELPER_TABLE);
     }
 
     public void deleteFromLocal() {
@@ -321,6 +355,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             priceList.price_value = c.getString(c.getColumnIndex(PRICE_VALUE));
             priceLists.add(priceList);
         }
+        c.close();
         return priceLists;
 
     }
@@ -341,6 +376,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             routeStationLists.add(routeStationList);
         }
+        c.close();
 
 
         return routeStationLists;

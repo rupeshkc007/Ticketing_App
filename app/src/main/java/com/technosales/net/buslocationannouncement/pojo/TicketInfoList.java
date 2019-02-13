@@ -5,5 +5,5 @@ public class TicketInfoList {
 
     }
 
-    public String ticketNumber, ticketPrice, ticketType, ticketDate, ticketTime, ticketLat, ticketLng;
+    public String ticketNumber, ticketPrice, ticketType, ticketDate, ticketTime, ticketLat, ticketLng,helper_id;
 }

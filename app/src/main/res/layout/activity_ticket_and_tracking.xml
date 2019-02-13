@@ -6,21 +6,42 @@
     android:layout_height="match_parent"
     tools:context=".activity.TicketAndTracking">
 
-    <TextView
-        android:id="@+id/route_name"
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/mainToolBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="?attr/actionBarSize"
         android:background="@color/colorPrimaryDark"
-        android:padding="10dp"
-        android:textColor="@android:color/white"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark">
+
+        <TextView
+            android:id="@+id/route_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:padding="10dp"
+            android:singleLine="true"
+            android:textColor="@android:color/white"
+            android:textSize="20sp" />
+
+    </android.support.v7.widget.Toolbar>
+
+    <TextView
+        android:id="@+id/helperName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/mainToolBar"
+        android:layout_margin="10dp"
+        android:textColor="@android:color/black"
         android:textSize="20sp" />
+
 
     <com.github.angads25.toggle.LabeledSwitch
         android:id="@+id/normalDiscountToggle"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/route_name"
+        android:layout_below="@+id/mainToolBar"
         android:layout_margin="10dp"
         android:textSize="25sp"
         app:colorBorder="#2403fc"

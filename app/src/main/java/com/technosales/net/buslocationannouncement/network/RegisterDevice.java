@@ -2,6 +2,7 @@ package com.technosales.net.buslocationannouncement.network;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,6 +16,7 @@ import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 import com.technosales.net.buslocationannouncement.R;
+import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
 
@@ -45,6 +47,26 @@ public class RegisterDevice {
                         String error = object.optString("error");
                         if (error.equalsIgnoreCase("false")) {
                             JSONArray data = object.optJSONArray("data");
+                            JSONObject metaData = object.optJSONObject("metaData");
+                            JSONArray helpersArray = metaData.optJSONArray("helpers");
+                            JSONObject device = metaData.optJSONObject("device");
+                            String deviceName = device.optString("name");
+
+                            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.DEVICE_NAME, deviceName).apply();
+                            if (new DatabaseHelper(context).helperLists().size() != helpersArray.length()) {
+                                new DatabaseHelper(context).clearHelpers();
+                                for (int i = 0; i < helpersArray.length(); i++) {
+                                    JSONObject helperObject = helpersArray.optJSONObject(i);
+                                    String id = helperObject.optString("id");
+                                    String name = helperObject.optString("name");
+                                    ContentValues contentValues = new ContentValues();
+                                    contentValues.put(DatabaseHelper.HELPER_ID, id);
+                                    contentValues.put(DatabaseHelper.HELPER_NAME, name);
+                                    new DatabaseHelper(context).insertHelpers(contentValues);
+                                }
+                            }
+
+
                             ArrayList<String> routeList = new ArrayList<>();
 
                             if (data.length() > 1) {

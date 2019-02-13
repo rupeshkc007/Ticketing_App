@@ -9,15 +9,23 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.TextView;
@@ -54,6 +62,8 @@ import com.rt.printerlibrary.setting.TextSetting;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.adapter.PriceAdapter;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
+import com.technosales.net.buslocationannouncement.network.TicketInfoDataPush;
+import com.technosales.net.buslocationannouncement.pojo.HelperList;
 import com.technosales.net.buslocationannouncement.pojo.PriceList;
 import com.technosales.net.buslocationannouncement.printer.BluetoothDeviceChooseDialog;
 import com.technosales.net.buslocationannouncement.printer.UsbDeviceChooseDialog;
@@ -73,7 +83,7 @@ import java.util.List;
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_DEVICE;
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_URL;
 
-public class TicketAndTracking extends BaseActivity implements PrinterObserver {
+public class TicketAndTracking extends AppCompatActivity implements PrinterObserver {
 
     private static final int PERMISSIONS_REQUEST_LOCATION = 2;
     private static final int ALARM_MANAGER_INTERVAL = 15000;
@@ -87,6 +97,7 @@ public class TicketAndTracking extends BaseActivity implements PrinterObserver {
     public LabeledSwitch normalDiscountToggle;
     private TextView totalCollectionTickets;
     private TextView route_name;
+    public TextView helperName;
 
 
     /////
@@ -100,12 +111,14 @@ public class TicketAndTracking extends BaseActivity implements PrinterObserver {
 
     private int bmpPrintWidth = 40;
     public Bitmap mBitmap;
+    private Toolbar mainToolBar;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ticket_and_tracking);
+
 
         /**/
         alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
@@ -124,6 +137,17 @@ public class TicketAndTracking extends BaseActivity implements PrinterObserver {
         normalDiscountToggle = findViewById(R.id.normalDiscountToggle);
         totalCollectionTickets = findViewById(R.id.totalCollectionTickets);
         route_name = findViewById(R.id.route_name);
+        helperName = findViewById(R.id.helperName);
+        mainToolBar = findViewById(R.id.mainToolBar);
+
+        setSupportActionBar(mainToolBar);
+        Drawable drawable = ContextCompat.getDrawable(getApplicationContext(), R.mipmap.helper_choose);
+        mainToolBar.setOverflowIcon(drawable);
+
+        helperName.setText(getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.NAME_HELPER, ""));
+
+
+        route_name.setSelected(true);
         route_name.setText(getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.ROUTE_NAME, ""));
 
         normalDiscountToggle.setLabelOn(getString(R.string.discount_rate));
@@ -156,13 +180,8 @@ public class TicketAndTracking extends BaseActivity implements PrinterObserver {
 
             }
         });
-        String isToday = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.DATE_TIME, "");
-        if (!isToday.equals(GeneralUtils.getDate())) {
-            getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.DATE_TIME, GeneralUtils.getDate()).apply();
-            getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().remove(UtilStrings.TOTAL_TICKETS).apply();
-            getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().remove(UtilStrings.TOTAL_COLLECTIONS).apply();
-            setTotal();
-        }
+        isToday();
+
 
         totalCollectionTickets.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -176,12 +195,31 @@ public class TicketAndTracking extends BaseActivity implements PrinterObserver {
 
         setTotal();
 
+
+        BaseApplication.instance.setCurrentCmdType(BaseEnum.CMD_ESC);
+        printerFactory = new UniversalPrinterFactory();
+        rtPrinter = printerFactory.create();
+
+        /*tv_ver.setText("PrinterExample Ver: v" + TonyUtils.getVersionName(this));*/
+        PrinterObserverManager.getInstance().add(this);//添加连接状态监听
+
         setEscPrint();
-        /*showUSBDeviceChooseDialog();*/
+        /*showUSBDeviceChooseDialog();    //use for voting*/
 
 
         showBluetoothDeviceChooseDialog();
     }
+
+    private void isToday() {
+        String isToday = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.DATE_TIME, "");
+        if (!isToday.equals(GeneralUtils.getDate())) {
+            getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.DATE_TIME, GeneralUtils.getDate()).apply();
+            getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().remove(UtilStrings.TOTAL_TICKETS).apply();
+            getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().remove(UtilStrings.TOTAL_COLLECTIONS).apply();
+            setTotal();
+        }
+    }
+
 
     private void showBluetoothDeviceChooseDialog() {
         bluetoothDeviceChooseDialog = new BluetoothDeviceChooseDialog();
@@ -269,26 +307,6 @@ public class TicketAndTracking extends BaseActivity implements PrinterObserver {
 
     }
 
-    @Override
-    public void initView() {
-
-    }
-
-    @Override
-    public void addListener() {
-
-    }
-
-    @Override
-    public void init() {
-        BaseApplication.instance.setCurrentCmdType(BaseEnum.CMD_ESC);
-        printerFactory = new UniversalPrinterFactory();
-        rtPrinter = printerFactory.create();
-
-        /*tv_ver.setText("PrinterExample Ver: v" + TonyUtils.getVersionName(this));*/
-        PrinterObserverManager.getInstance().add(this);//添加连接状态监听
-
-    }
 
     public void setPriceLists(int min) {
         priceLists = databaseHelper.priceLists(min);
@@ -415,7 +433,7 @@ public class TicketAndTracking extends BaseActivity implements PrinterObserver {
 
                 CommonSetting commonSetting = new CommonSetting();
                 commonSetting.setAlign(CommonEnum.ALIGN_MIDDLE);
-                commonSetting.setEscLineSpacing(10);
+                commonSetting.setEscLineSpacing(12);
                 cmd.append(cmd.getCommonSettingCmd(commonSetting));
 
                 BitmapSetting bitmapSetting = new BitmapSetting();
@@ -443,4 +461,50 @@ public class TicketAndTracking extends BaseActivity implements PrinterObserver {
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+
+        for (int i = 0; i < databaseHelper.helperLists().size(); i++) {
+            HelperList helperList = databaseHelper.helperLists().get(i);
+
+            menu.add(0, i, 0, helperList.helper_id + "-" + helperList.helper_name);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        int id = item.getItemId(); //to get the selected menu id
+        String name = (String) item.getTitle(); //to get the selected menu name
+        Log.i("menuItem", name + "");
+        String helperNameId[] = name.split("-");
+
+        /*helperName = helperNameId[1];*/
+        getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.ID_HELPER, helperNameId[0]).apply();
+        getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.NAME_HELPER, helperNameId[1]).apply();
+
+        helperName.setText(getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.NAME_HELPER, ""));
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        isToday();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        isToday();
+    }
 }

@@ -26,7 +26,6 @@ public class TicketInfoDataPush {
             Map<String, Object> params = new HashMap<>();
             params.put("data", ticketInfoObject);
             params.put("device_id",context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES,0).getString(UtilStrings.DEVICE_ID,""));
-            Log.i("getParams", "" + params);
             JSONArray data = ticketInfoObject.optJSONArray("data");
             String tickId = "";
             for (int i = 0; i < data.length(); i++) {
@@ -45,6 +44,7 @@ public class TicketInfoDataPush {
                     if (object != null) {
                         if (object.optString("error").equals("false")) {
                             new DatabaseHelper(context).deleteFromLocal();
+
                         }
 
 
@@ -52,7 +52,7 @@ public class TicketInfoDataPush {
                         context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.DATA_SENDING, false).apply();
                     }
                 }
-            }.timeout(1000 * 60 * 25));
+            }.timeout(1000 * 60 * 15));
         } else {
             context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.DATA_SENDING, false).apply();
 

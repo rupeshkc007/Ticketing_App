@@ -81,7 +81,7 @@ public class GeneralUtils {
 
     public static String getFullDate() {
         Calendar c = Calendar.getInstance();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-M-dd");
         return df.format(c.getTime());
     }
 
@@ -123,5 +123,37 @@ public class GeneralUtils {
         }
 
         return unicodeChar;
+    }
+
+    public static String getNepaliMonth(String valueOfchar) {
+        String nepali_month = "";
+        if (valueOfchar.equals("1")) {
+            nepali_month = "बैशाख";
+        } else if (valueOfchar.equals("2")) {
+            nepali_month = "जेठ";
+        } else if (valueOfchar.equals("3")) {
+            nepali_month = "आषाढ";
+        } else if (valueOfchar.equals("4")) {
+            nepali_month = "साउन";
+        } else if (valueOfchar.equals("5")) {
+            nepali_month = "भाद्र";
+        } else if (valueOfchar.equals("6")) {
+            nepali_month = "आश्विन";
+        } else if (valueOfchar.equals("7")) {
+            nepali_month = "कार्तिक";
+        } else if (valueOfchar.equals("8")) {
+            nepali_month = "मंसिर";
+        } else if (valueOfchar.equals("9")) {
+            nepali_month = "पौष";
+        } else if (valueOfchar.equals("10")) {
+            nepali_month = "माघ";
+        } else if (valueOfchar.equals("11")) {
+            nepali_month = "फाल्गुण";
+        } else if (valueOfchar.equals("12")) {
+            nepali_month = "चैत्र";
+        }
+
+        Log.i("getNepaliDate", "" + nepali_month);
+        return nepali_month;
     }
 }

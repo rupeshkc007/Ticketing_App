@@ -12,6 +12,9 @@ public class UtilStrings {
     public static final String DATA_SENDING = "data_sent";
     public static final String LAST_DATA_ID = "last_data_id";
     public static final String ROUTE_NAME = "route_name";
+    public static final String DEVICE_NAME = "device_name";
+    public static final String NAME_HELPER = "helper_name";
+    public static final String ID_HELPER = "helper_id";
 
 
     //    public static final String MAIN_URL = "http://172.16.1.131:85/route_api/public/api/";
