@@ -20,7 +20,7 @@
                                     <map>
                                       <entry key="assetType" value="IMAGE" />
                                       <entry key="iconShape" value="NONE" />
-                                      <entry key="imageAsset" value="$USER_HOME$/Downloads/usericon.png" />
+                                      <entry key="imageAsset" value="$USER_HOME$/Downloads/usericon.png.png" />
                                       <entry key="outputName" value="helper_choose" />
                                     </map>
                                   </option>

@@ -117,12 +117,11 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
         StatusActivity.addMessage(context.getString(R.string.status_location_update));
         if (position != null) {
             write(position);
-            if (databaseHelper.listTickets().size()>0){
+            if (databaseHelper.listTickets().size() > 0) {
                 boolean datasending = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getBoolean(UtilStrings.DATA_SENDING, false);
                 if (!datasending) {
                     databaseHelper.ticketInfoLists();
                 }
-
             }
             for (int i = 0; i < routeStationLists.size(); i++) {
                 RouteStationList routeStationList = routeStationLists.get(i);

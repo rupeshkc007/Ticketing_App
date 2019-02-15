@@ -17,14 +17,16 @@ public class UtilStrings {
     public static final String ID_HELPER = "helper_id";
 
 
-    //    public static final String MAIN_URL = "http://172.16.1.131:85/route_api/public/api/";
-    public static final String MAIN_URL = "http://202.52.240.149:85/route_api/public/api/";
+    //    public static final String MAIN_URL = "http://172.16.1.131:85/route_api/public/api/";//server
+//    public static final String MAIN_URL = "http://202.52.240.149:85/route_api/public/api/";//test---8170613861
+    public static final String MAIN_URL = "http://202.52.240.149/route_api_v2/public/api/";//production
     public static final String REGISTER_URL = MAIN_URL + "routeDevice";
     public static final String ROUTE_STATION = MAIN_URL + "getRouteStation";
 
 
-    //    public static final String TICKET_URL = "http://172.16.1.131:85/routemanagement/api/";
-    public static final String TICKET_URL = "http://202.52.240.149:85/routemanagement/api/";
+    //    public static final String TICKET_URL = "http://172.16.1.131:85/routemanagement/api/";/// server
+//    public static final String TICKET_URL = "http://117.121.237.226:83/routemanagement/api/";/// production
+    public static final String TICKET_URL = "http://202.52.240.149:85/routemanagement/api/";////testServer
     public static final String TICKET_PRICE_LIST = "rate_list";
     public static final String TICKET_POST = TICKET_URL + "store_ticket";
 

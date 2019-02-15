@@ -171,6 +171,13 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
             @Override
             public void onSwitched(LabeledSwitch labeledSwitch, boolean isOn) {
 
+                if (databaseHelper.listTickets().size() > 0) {
+                    boolean datasending = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getBoolean(UtilStrings.DATA_SENDING, false);
+                    if (!datasending) {
+                        databaseHelper.ticketInfoLists();
+                    }
+                }
+
                 if (isOn) {
                     setPriceLists(0);
                 } else {

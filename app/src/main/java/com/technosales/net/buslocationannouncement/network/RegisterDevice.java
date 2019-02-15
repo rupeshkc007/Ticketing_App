@@ -53,7 +53,8 @@ public class RegisterDevice {
                             String deviceName = device.optString("name");
 
                             context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.DEVICE_NAME, deviceName).apply();
-                            if (new DatabaseHelper(context).helperLists().size() != helpersArray.length()) {
+                            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().remove(UtilStrings.NAME_HELPER).apply();
+                            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().remove(UtilStrings.ID_HELPER).apply();
                                 new DatabaseHelper(context).clearHelpers();
                                 for (int i = 0; i < helpersArray.length(); i++) {
                                     JSONObject helperObject = helpersArray.optJSONObject(i);
@@ -64,7 +65,6 @@ public class RegisterDevice {
                                     contentValues.put(DatabaseHelper.HELPER_NAME, name);
                                     new DatabaseHelper(context).insertHelpers(contentValues);
                                 }
-                            }
 
 
                             ArrayList<String> routeList = new ArrayList<>();

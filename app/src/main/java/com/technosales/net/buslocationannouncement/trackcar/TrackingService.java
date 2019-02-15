@@ -32,8 +32,20 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
+import com.androidquery.AQuery;
+import com.androidquery.callback.AjaxCallback;
+import com.androidquery.callback.AjaxStatus;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
+import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
+import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
+import com.technosales.net.buslocationannouncement.utils.UtilStrings;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class TrackingService extends Service {
 
@@ -155,5 +167,7 @@ public class TrackingService extends Service {
 
 
     }
+
+
 
 }

@@ -110,6 +110,8 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
                 busName = preferences.getString(UtilStrings.DEVICE_NAME, "");
 
                 routeStationLists = databaseHelper.routeStationLists();
+
+                Log.i("isdataSending", "" + preferences.getBoolean(UtilStrings.DATA_SENDING, false));
                 float distance = 0;
                 float nearest = 0;
                 if (helperId.length() > 0) {
@@ -197,7 +199,7 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
                 }*/
                     //imageprint
                     ((TicketAndTracking) context).mBitmap = drawText(busName + "\n" +
-                            /* "टि.न.:"+*/ GeneralUtils.getUnicodeNumber(ticketInfoList.ticketNumber) + "\n" +
+                            "टि.न.:" + GeneralUtils.getUnicodeNumber(ticketInfoList.ticketNumber) + "\n" +
                             "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.ticketPrice) + discountType + "\n" +
                             nearest_name + "\n" +
                             GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "

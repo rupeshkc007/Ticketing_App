@@ -1,7 +1,6 @@
 package com.technosales.net.buslocationannouncement.network;
 
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.androidquery.AQuery;
@@ -16,43 +15,45 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class TicketInfoDataPush {
-
-    public static void pushBusData(final Context context, final JSONObject ticketInfoObject) {
+    public static void pushBusData(final Context context, final List<TicketInfoList> ticketInfoLists) {
         context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.DATA_SENDING, true).apply();
         if (GeneralUtils.isNetworkAvailable(context)) {
-            Map<String, Object> params = new HashMap<>();
-            params.put("data", ticketInfoObject);
-            params.put("device_id",context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES,0).getString(UtilStrings.DEVICE_ID,""));
-            JSONArray data = ticketInfoObject.optJSONArray("data");
-            String tickId = "";
-            for (int i = 0; i < data.length(); i++) {
-                tickId = tickId + data.optJSONObject(i).optString("ticket_number") + ",";
+            for (int i = 0; i < ticketInfoLists.size(); i++) {
+                final TicketInfoList ticketInfoList = ticketInfoLists.get(i);
+                Map<String, Object> params = new HashMap<>();
+                params.put("helper_id", ticketInfoList.helper_id);
+                params.put("ticket_number", ticketInfoList.ticketNumber);
+                params.put("price", ticketInfoList.ticketPrice);
+                params.put("device_time", ticketInfoList.ticketDate + " " + ticketInfoList.ticketTime);
+                params.put("ticket_type", ticketInfoList.ticketType);
+                params.put("latitude", ticketInfoList.ticketLat);
+                params.put("longitude", ticketInfoList.ticketLng);
+                params.put("trip", "1");
+                params.put("device_id", context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.DEVICE_ID, ""));
+                AQuery aQuery = new AQuery(context);
+                Log.i("getParams", "" + params);
+                aQuery.ajax(UtilStrings.TICKET_POST, params, JSONObject.class, new AjaxCallback<JSONObject>() {
+                    @Override
+                    public void callback(String url, JSONObject object, AjaxStatus status) {
+                        super.callback(url, object, status);
+                        Log.i("getParams", object + ticketInfoList.ticketNumber);
+                        if (object != null) {
+                            if (object.optString("error").equals("false")) {
+                                new DatabaseHelper(context).deleteFromLocalId(ticketInfoList.ticketNumber);
 
-            }
-            Log.i("ticketId", "" + tickId);
+                            }
 
-            AQuery aQuery = new AQuery(context);
 
-            aQuery.ajax(UtilStrings.TICKET_POST, params, JSONObject.class, new AjaxCallback<JSONObject>() {
-                @Override
-                public void callback(String url, JSONObject object, AjaxStatus status) {
-                    super.callback(url, object, status);
-                    Log.i("getParams", "" + object);
-                    if (object != null) {
-                        if (object.optString("error").equals("false")) {
-                            new DatabaseHelper(context).deleteFromLocal();
-
+                        } else {
                         }
-
-
-                    } else {
-                        context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.DATA_SENDING, false).apply();
                     }
-                }
-            }.timeout(1000 * 60 * 15));
+                }.timeout(1000 * 60 * 15));
+            }
+            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.DATA_SENDING, false).apply();
         } else {
             context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.DATA_SENDING, false).apply();
 

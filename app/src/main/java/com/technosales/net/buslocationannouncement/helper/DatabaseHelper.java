@@ -32,6 +32,7 @@ import com.technosales.net.buslocationannouncement.pojo.PriceList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.pojo.TicketInfoList;
 import com.technosales.net.buslocationannouncement.trackcar.Position;
+import com.technosales.net.buslocationannouncement.trackcar.TrackingService;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
 
 import org.json.JSONArray;
@@ -238,6 +239,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         contentValues.put(TICKET_LNG, ticketInfoList.ticketLng);
         contentValues.put(HELPER_ID, ticketInfoList.helper_id);
         sqLiteDatabase.insert(TICKET_TABLE, null, contentValues);
+
+        boolean datasending = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getBoolean(UtilStrings.DATA_SENDING, false);
+        if (!datasending) {
+            ticketInfoLists();
+        }
     }
 
     public List<TicketInfoList> listTickets() {
@@ -281,7 +287,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         cursor.close();
         context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putInt(UtilStrings.LAST_DATA_ID, id).apply();
-        TicketInfoDataPush.pushBusData(context, getJsonData(ticketInfoLists));
+        TicketInfoDataPush.pushBusData(context, ticketInfoLists);
+        /*TicketInfoDataPush.pushBusData(context, getJsonData(ticketInfoLists));*/
     }
 
 
@@ -337,6 +344,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Log.i("deleteFromLocal", "" + sql);
         getWritableDatabase().execSQL(sql);
         context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.DATA_SENDING, false).apply();
+
+    }
+
+    public void deleteFromLocalId(String ticketNo) {
+        String sql = "DELETE FROM " + TICKET_TABLE + " WHERE " + TICKET_NUMBER + " ='" + ticketNo + "'";
+        Log.i("deleteFromLocal", "" + sql);
+        getWritableDatabase().execSQL(sql);
+        /*context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.DATA_SENDING, false).apply();*/
 
     }
 
