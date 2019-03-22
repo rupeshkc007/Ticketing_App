@@ -21,6 +21,7 @@
             android:background="@drawable/price_item_bg"
             android:gravity="center"
             android:padding="5dp"
+            android:text="Abc"
             android:textColor="@color/text_color"
             android:textSize="40sp" />
 

@@ -23,6 +23,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.util.Log;
 
 import com.technosales.net.buslocationannouncement.network.RouteStation;
@@ -33,12 +34,15 @@ import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.pojo.TicketInfoList;
 import com.technosales.net.buslocationannouncement.trackcar.Position;
 import com.technosales.net.buslocationannouncement.trackcar.TrackingService;
+import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -62,6 +66,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
     public static final String TICKET_TABLE = "ticket_table";
+    public static final String TICKET_TABLE_TXT = "ticket_table_txt";
     public static final String TICKET_NUMBER = "ticket_number";
     public static final String TICKET_PRICE = "ticket_price";
     public static final String TICKET_TYPE = "ticket_type";
@@ -146,6 +151,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 TICKET_LAT + " TEXT," +
                 HELPER_ID + " TEXT," +
                 TICKET_LNG + " TEXT)");
+        db.execSQL("CREATE TABLE ticket_table_txt (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                TICKET_NUMBER + " TEXT," +
+                TICKET_PRICE + " TEXT," +
+                TICKET_TYPE + " TEXT," +
+                TICKET_DATE + " TEXT," +
+                TICKET_TIME + " TEXT," +
+                TICKET_LAT + " TEXT," +
+                HELPER_ID + " TEXT," +
+                TICKET_LNG + " TEXT)");
 
         db.execSQL("CREATE TABLE price_table (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -173,6 +188,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS ticket_table;");
         db.execSQL("DROP TABLE IF EXISTS price_table;");
         db.execSQL("DROP TABLE IF EXISTS route_station;");
+        db.execSQL("DROP TABLE IF EXISTS ticket_table_txt;");
         onCreate(db);
     }
 
@@ -181,6 +197,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS ticket_table;");
         db.execSQL("DROP TABLE IF EXISTS price_table;");
         db.execSQL("DROP TABLE IF EXISTS route_station;");
+        db.execSQL("DROP TABLE IF EXISTS ticket_table_txt;");
         onCreate(db);
     }
 
@@ -240,10 +257,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         contentValues.put(HELPER_ID, ticketInfoList.helper_id);
         sqLiteDatabase.insert(TICKET_TABLE, null, contentValues);
 
-        boolean datasending = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getBoolean(UtilStrings.DATA_SENDING, false);
+
+        insertTicketTxt(contentValues);
+
+       /* boolean datasending = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getBoolean(UtilStrings.DATA_SENDING, false);
         if (!datasending) {
             ticketInfoLists();
-        }
+        }*/
+    }
+
+    public void insertTicketTxt(ContentValues contentValues) {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        sqLiteDatabase.insert(TICKET_TABLE_TXT, null, contentValues);
+        /*writeToFile();*/ // need at the end of the day
     }
 
     public List<TicketInfoList> listTickets() {
@@ -266,11 +292,36 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     }
 
+    public int remainingAmount() {
+        int amount = 0;
+        int ticketAmount;
+        List<TicketInfoList> ticketInfoLists = new ArrayList<>();
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM " + TICKET_TABLE, null);
+        while (cursor.moveToNext()) {
+            TicketInfoList ticketInfoList = new TicketInfoList();
+            ticketInfoList.ticketNumber = cursor.getString(cursor.getColumnIndex(TICKET_NUMBER));
+            ticketInfoList.ticketPrice = cursor.getString(cursor.getColumnIndex(TICKET_PRICE));
+            ticketInfoList.ticketType = cursor.getString(cursor.getColumnIndex(TICKET_TYPE));
+            ticketInfoList.ticketDate = cursor.getString(cursor.getColumnIndex(TICKET_DATE));
+            ticketInfoList.ticketTime = cursor.getString(cursor.getColumnIndex(TICKET_TIME));
+            ticketInfoList.ticketLat = cursor.getString(cursor.getColumnIndex(TICKET_LAT));
+            ticketInfoList.ticketLng = cursor.getString(cursor.getColumnIndex(TICKET_LNG));
+            ticketInfoList.helper_id = cursor.getString(cursor.getColumnIndex(HELPER_ID));
+            ticketInfoLists.add(ticketInfoList);
+            ticketAmount = Integer.parseInt(ticketInfoList.ticketPrice);
+            amount = amount + ticketAmount;
+
+        }
+
+        return amount;
+    }
+
     public void ticketInfoLists() {
         int id = 0;
         List<TicketInfoList> ticketInfoLists = new ArrayList<>();
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
-        Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM " + TICKET_TABLE, null);
+        Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM " + TICKET_TABLE+ " LIMIT 1", null);
         while (cursor.moveToNext()) {
             TicketInfoList ticketInfoList = new TicketInfoList();
             ticketInfoList.ticketNumber = cursor.getString(cursor.getColumnIndex(TICKET_NUMBER));
@@ -287,7 +338,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         cursor.close();
         context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putInt(UtilStrings.LAST_DATA_ID, id).apply();
-        TicketInfoDataPush.pushBusData(context, ticketInfoLists);
+        /*TicketInfoDataPush.pushBusData(context, ticketInfoLists);*/
         /*TicketInfoDataPush.pushBusData(context, getJsonData(ticketInfoLists));*/
     }
 
@@ -529,5 +580,48 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }.execute();
     }
 
+
+    public String getWriteData() {
+        String sql = "SELECT * FROM " + TICKET_TABLE_TXT;
+        String data = "";
+        Cursor c = getWritableDatabase().rawQuery(sql, null);
+        while (c.moveToNext()) {
+            data = data + c.getString(c.getColumnIndex(TICKET_NUMBER)) + "\t" +
+                    c.getString(c.getColumnIndex(TICKET_PRICE)) + "\t" +
+                    c.getString(c.getColumnIndex(TICKET_TYPE)) + "\t" +
+                    c.getString(c.getColumnIndex(TICKET_DATE)) + "\t" +
+                    c.getString(c.getColumnIndex(TICKET_TIME)) + "\t" +
+                    c.getString(c.getColumnIndex(TICKET_LAT)) + "\t" +
+                    c.getString(c.getColumnIndex(TICKET_LNG)) + "\t" +
+                    c.getString(c.getColumnIndex(HELPER_ID)) + "\t" + "\n";
+        }
+        c.close();
+        return data;
+
+    }
+
+    public void writeToFile() {
+        String data = getWriteData();
+        Log.i("Data", "Data:" + data);
+
+        File txtFile = new File(Environment.getExternalStorageDirectory() + "/TicketData/" + GeneralUtils.getFullDate() + ".txt");
+
+        if (!txtFile.exists()) {
+            try {
+                txtFile.createNewFile();
+                GeneralUtils.writeInTxt(txtFile, data);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            GeneralUtils.writeInTxt(txtFile, data);
+        }
+
+    }
+
+    public void clearTxtTable() {
+        String sql = "DELETE FROM " + TICKET_TABLE_TXT;
+        getWritableDatabase().execSQL(sql);
+    }
 
 }

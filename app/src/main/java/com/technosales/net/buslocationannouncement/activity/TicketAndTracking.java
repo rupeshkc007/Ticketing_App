@@ -5,10 +5,13 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
@@ -19,6 +22,7 @@ import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -76,10 +80,15 @@ import com.technosales.net.buslocationannouncement.trackcar.TrackingService;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_ACCURACY;
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_DEVICE;
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_URL;
 
@@ -96,6 +105,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
     private RecyclerView priceListView;
     public LabeledSwitch normalDiscountToggle;
     private TextView totalCollectionTickets;
+    public TextView totalRemainingTickets;
     private TextView route_name;
     public TextView helperName;
 
@@ -112,6 +122,9 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
     private int bmpPrintWidth = 40;
     public Bitmap mBitmap;
     private Toolbar mainToolBar;
+    private int totalTickets;
+    private int totalCollections;
+    private boolean reset = true;
 
 
     @Override
@@ -127,6 +140,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         trackCarPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         trackCarPrefs.edit().putString(KEY_URL, getResources().getString(R.string.settings_url_default_value)).apply();
         trackCarPrefs.edit().putString(KEY_DEVICE, getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.DEVICE_ID, "")).apply();
+        trackCarPrefs.edit().putString(KEY_ACCURACY, "high").apply();
         /*trackCarPrefs.edit().putString(KEY_DEVICE, "12345678").apply();*/
         databaseHelper = new DatabaseHelper(this);
         new TrackingController(this);
@@ -136,6 +150,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         priceListView = findViewById(R.id.priceListView);
         normalDiscountToggle = findViewById(R.id.normalDiscountToggle);
         totalCollectionTickets = findViewById(R.id.totalCollectionTickets);
+        totalRemainingTickets = findViewById(R.id.remainingTickets);
         route_name = findViewById(R.id.route_name);
         helperName = findViewById(R.id.helperName);
         mainToolBar = findViewById(R.id.mainToolBar);
@@ -148,7 +163,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
 
 
         route_name.setSelected(true);
-        route_name.setText(getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.ROUTE_NAME, ""));
+        route_name.setText(getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.DEVICE_NAME, "") + "-" + getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.ROUTE_NAME, ""));
 
         normalDiscountToggle.setLabelOn(getString(R.string.discount_rate));
         normalDiscountToggle.setLabelOff(getString(R.string.normal_rate));
@@ -170,13 +185,15 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         normalDiscountToggle.setOnToggledListener(new OnToggledListener() {
             @Override
             public void onSwitched(LabeledSwitch labeledSwitch, boolean isOn) {
-
+                /*totalRemainingTickets.setText(GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.listTickets().size())) + "\n" + GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.remainingAmount())));
                 if (databaseHelper.listTickets().size() > 0) {
                     boolean datasending = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getBoolean(UtilStrings.DATA_SENDING, false);
                     if (!datasending) {
                         databaseHelper.ticketInfoLists();
                     }
-                }
+
+
+                }*/
 
                 if (isOn) {
                     setPriceLists(0);
@@ -188,19 +205,35 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
             }
         });
         isToday();
+        GeneralUtils.createTicketFolder();
 
 
         totalCollectionTickets.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().remove(UtilStrings.TOTAL_TICKETS).apply();
-                getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().remove(UtilStrings.TOTAL_COLLECTIONS).apply();
-                setTotal();
-                databaseHelper.clearAllFromData();
+
+                AlertDialog alertDialog = new AlertDialog.Builder(TicketAndTracking.this).create();
+                alertDialog.setTitle("CONFIRM");
+                alertDialog.setMessage("Clear Data");
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().remove(UtilStrings.TOTAL_TICKETS).apply();
+                                getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().remove(UtilStrings.TOTAL_COLLECTIONS).apply();
+                                setTotal();
+                                databaseHelper.clearAllFromData();
+                                databaseHelper.clearTxtTable();
+                            }
+                        });
+                alertDialog.show();
+
+
             }
         });
 
         setTotal();
+        interValDataPush();
 
 
         BaseApplication.instance.setCurrentCmdType(BaseEnum.CMD_ESC);
@@ -214,7 +247,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         /*showUSBDeviceChooseDialog();    //use for voting*/
 
 
-        showBluetoothDeviceChooseDialog();
+        /*showBluetoothDeviceChooseDialog();*/
     }
 
     private void isToday() {
@@ -223,7 +256,11 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
             getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.DATE_TIME, GeneralUtils.getDate()).apply();
             getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().remove(UtilStrings.TOTAL_TICKETS).apply();
             getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().remove(UtilStrings.TOTAL_COLLECTIONS).apply();
+            new DatabaseHelper(this).clearTxtTable();
             setTotal();
+
+            getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.RESET, true).apply();
+            TicketInfoDataPush.resetData(TicketAndTracking.this);
         }
     }
 
@@ -318,18 +355,55 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
     public void setPriceLists(int min) {
         priceLists = databaseHelper.priceLists(min);
         priceListView.setAdapter(new PriceAdapter(priceLists, TicketAndTracking.this));
+        /*saveBitmap(getBitmapFromView(priceListView));*/
         setTotal();
 
     }
 
+    private void saveBitmap(Bitmap bitmap) {
+        File deviceScreenShotPath = new File("/storage/sdcard0/DCIM/Camera/file.jpg");
+
+
+        FileOutputStream fos;
+        try {
+            fos = new FileOutputStream(deviceScreenShotPath);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+
+            fos.flush();
+            fos.close();
+        } catch (FileNotFoundException e) {
+            Log.e("GREC", e.getMessage(), e);
+        } catch (IOException e) {
+            Log.e("GREC", e.getMessage(), e);
+
+        }
+
+    }
+
     public void setTotal() {
-        int totalTickets = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.TOTAL_TICKETS, 0);
-        int totalCollections = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.TOTAL_COLLECTIONS, 0);
+        totalTickets = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.TOTAL_TICKETS, 0);
+        totalCollections = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.TOTAL_COLLECTIONS, 0);
 //        totalCollectionTickets.setText("Total Tickets :" + String.valueOf(totalTickets) + "\n Total Colletions :" + String.valueOf(totalCollections));
         totalCollectionTickets.setText(getString(R.string.total_tickets) + GeneralUtils.getUnicodeNumber(String.valueOf(totalTickets)) + "\n" + getString(R.string.total_collections) + GeneralUtils.getUnicodeNumber(String.valueOf(totalCollections)));
 
 
     }
+    //////
+    //////
+
+    public static Bitmap getBitmapFromView(View view) {
+        Bitmap returnedBitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(returnedBitmap);
+        Drawable bgDrawable = view.getBackground();
+        if (bgDrawable != null)
+            bgDrawable.draw(canvas);
+        else
+            canvas.drawColor(Color.WHITE);
+        view.draw(canvas);
+        return returnedBitmap;
+    }
+    //////
+    /////
 
 
     private void startTrackingService(boolean checkPermission, boolean permission) {
@@ -513,5 +587,48 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
     protected void onResume() {
         super.onResume();
         isToday();
+    }
+
+    Handler rHandler;
+    Runnable rTicker;
+    int i = 0;
+
+    public void interValDataPush() {
+        rHandler = new Handler();
+        rTicker = new Runnable() {
+            public void run() {
+                long now = SystemClock.uptimeMillis();
+                long next = now + 15000;
+                i++;
+                if (i >= 10) {
+                    i = 0;
+                }
+                isToday();
+
+                reset = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getBoolean(UtilStrings.RESET, true);
+                if (!reset) {
+                    if (totalTickets != getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.SENT_TICKET, 0))
+                        TicketInfoDataPush.pushBusData(TicketAndTracking.this, totalTickets, totalCollections);
+                }
+
+
+
+                /*totalRemainingTickets.setText(GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.listTickets().size())) + "\n" + GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.remainingAmount())));
+                if (databaseHelper.listTickets().size() > 0) {
+                    boolean datasending = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getBoolean(UtilStrings.DATA_SENDING, false);
+                    if (!datasending) {
+                        databaseHelper.ticketInfoLists();
+                    }
+
+
+                }*/
+
+                rHandler.postAtTime(rTicker, next);
+            }
+        }
+
+        ;
+        rTicker.run();
+
     }
 }

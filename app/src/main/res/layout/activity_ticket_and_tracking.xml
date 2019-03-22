@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.TicketAndTracking">
+    tools:activity=".activity.TicketAndTracking">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/mainToolBar"
@@ -51,20 +51,43 @@
         android:id="@+id/priceListView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/totalCollectionTickets"
+        android:layout_above="@+id/totalRemaining"
         android:layout_below="@+id/normalDiscountToggle"
         android:overScrollMode="never" />
-
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:id="@+id/totalRemaining"
+    android:orientation="horizontal"
+    >
     <TextView
         android:id="@+id/totalCollectionTickets"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_gravity="bottom"
         android:background="@android:color/black"
         android:textAlignment="center"
         android:textColor="@android:color/white"
+        android:textSize="25sp"
+        android:layout_weight="3"/>
+    <View
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:background="@android:color/white"/>
+    <TextView
+        android:id="@+id/remainingTickets"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="match_parent"
+        android:layout_gravity="bottom"
+        android:background="@android:color/black"
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
         android:textSize="25sp" />
+</LinearLayout>
+
 
 
 </RelativeLayout>

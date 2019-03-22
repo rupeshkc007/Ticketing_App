@@ -21,8 +21,10 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.technosales.net.buslocationannouncement.R;
+import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
@@ -117,12 +119,11 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
         StatusActivity.addMessage(context.getString(R.string.status_location_update));
         if (position != null) {
             write(position);
-            if (databaseHelper.listTickets().size() > 0) {
-                boolean datasending = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getBoolean(UtilStrings.DATA_SENDING, false);
-                if (!datasending) {
-                    databaseHelper.ticketInfoLists();
-                }
-            }
+
+            Toast.makeText(context,"", Toast.LENGTH_SHORT).show();
+            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LATITUDE, String.valueOf(position.getLatitude())).apply();
+            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LONGITUDE, String.valueOf(position.getLongitude())).apply();
+
             for (int i = 0; i < routeStationLists.size(); i++) {
                 RouteStationList routeStationList = routeStationLists.get(i);
                 double stationLat = Double.parseDouble(routeStationList.station_lat);
@@ -165,13 +166,8 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
                 }
 
             }
-
-
-            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LATITUDE, String.valueOf(position.getLatitude())).apply();
-            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LONGITUDE, String.valueOf(position.getLongitude())).apply();
-
-            Log.v("nearest", "pos :" + position.getLatitude() + "," + position.getLongitude());
         }
+
     }
 
     @Override

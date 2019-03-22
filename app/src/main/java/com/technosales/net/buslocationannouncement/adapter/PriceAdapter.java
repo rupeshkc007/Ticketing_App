@@ -1,6 +1,7 @@
 package com.technosales.net.buslocationannouncement.adapter;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -9,6 +10,7 @@ import android.graphics.Paint;
 import android.os.Build;
 import android.os.Environment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.text.Layout;
@@ -103,92 +105,103 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
         holder.priceCard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                preferences = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0);
-                databaseHelper = new DatabaseHelper(context);
-
-                helperId = preferences.getString(UtilStrings.ID_HELPER, "");
-                busName = preferences.getString(UtilStrings.DEVICE_NAME, "");
-
-                routeStationLists = databaseHelper.routeStationLists();
-
-                Log.i("isdataSending", "" + preferences.getBoolean(UtilStrings.DATA_SENDING, false));
-                float distance = 0;
-                float nearest = 0;
-                if (helperId.length() > 0) {
-                    for (int i = 0; i < routeStationLists.size(); i++) {
-                        double startLat = Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"));
-                        double startLng = Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0"));
-                        double endLat = Double.parseDouble(routeStationLists.get(i).station_lat);
-                        double endLng = Double.parseDouble(routeStationLists.get(i).station_lng);
-                        distance = GeneralUtils.calculateDistance(startLat, startLng, endLat, endLng);
-                        if (i == 0) {
-                            nearest = distance;
-                        } else if (i > 0) {
-                            if (distance < nearest) {
-                                nearest = distance;
-                                nearest_name = routeStationLists.get(i).station_name;
-                            }
-
-                        }
-                    }
 
 
-                    total_tickets = preferences.getInt(UtilStrings.TOTAL_TICKETS, 0);
-                    total_collections = preferences.getInt(UtilStrings.TOTAL_COLLECTIONS, 0);
-                    deviceId = preferences.getString(UtilStrings.DEVICE_ID, "");
-                    latitude = preferences.getString(UtilStrings.LATITUDE, "");
-                    longitude = preferences.getString(UtilStrings.LONGITUDE, "");
+                AlertDialog alertDialog = new AlertDialog.Builder(context).create();
+                alertDialog.setTitle("CONFIRM");
+                alertDialog.setMessage("Print Ticket");
+                alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
 
-                    total_tickets = total_tickets + 1;
-                    total_collections = total_collections + Integer.parseInt(priceList.price_value);
-                    preferences.edit().putInt(UtilStrings.TOTAL_TICKETS, total_tickets).apply();
-                    preferences.edit().putInt(UtilStrings.TOTAL_COLLECTIONS, total_collections).apply();
-                    Log.i("nearest_name", "" + nearest_name + ":" + total_tickets + "");
+                                ///startProcess
+                                preferences = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0);
+                                databaseHelper = new DatabaseHelper(context);
 
-                    if (((TicketAndTracking) context).normalDiscountToggle.isOn()) {
-                        ticketType = "discount";
-                        discountType = "(छुट)";
-                    } else {
-                        ticketType = "full";
-                        discountType = "(साधारण)";
-                    }
-                    ((TicketAndTracking) context).setTotal();
-                    String valueOfTickets = "";
-                    if (total_tickets < 10) {
-                        valueOfTickets = "00" + String.valueOf(total_tickets);
+                                helperId = preferences.getString(UtilStrings.ID_HELPER, "");
+                                busName = preferences.getString(UtilStrings.DEVICE_NAME, "");
 
-                    } else if (total_tickets > 9 && total_tickets < 100) {
-                        valueOfTickets = "0" + String.valueOf(total_tickets);
-                    } else {
-                        valueOfTickets = String.valueOf(total_tickets);
-                    }
-                    dateConverter = new DateConverter();
-                    String dates[] = GeneralUtils.getFullDate().split("-");
-                    int dateYear = Integer.parseInt(dates[0]);
-                    int dateMonth = Integer.parseInt(dates[1]);
-                    int dateDay = Integer.parseInt(dates[2]);
+                                routeStationLists = databaseHelper.routeStationLists();
 
+                                Log.i("isdataSending", "" + preferences.getBoolean(UtilStrings.DATA_SENDING, false));
+                                float distance = 0;
+                                float nearest = 0;
+                                if (helperId.length() > 0) {
+                                    for (int i = 0; i < routeStationLists.size(); i++) {
+                                        double startLat = Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"));
+                                        double startLng = Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0"));
+                                        double endLat = Double.parseDouble(routeStationLists.get(i).station_lat);
+                                        double endLng = Double.parseDouble(routeStationLists.get(i).station_lng);
+                                        distance = GeneralUtils.calculateDistance(startLat, startLng, endLat, endLng);
+                                        if (i == 0) {
+                                            nearest = distance;
+                                        } else if (i > 0) {
+                                            if (distance < nearest) {
+                                                nearest = distance;
+                                                nearest_name = routeStationLists.get(i).station_name;
+                                            }
 
-                    Model outputOfConversion = dateConverter.getNepaliDate(dateYear, dateMonth, dateDay);
-
-                    int year = outputOfConversion.getYear();
-                    int month = outputOfConversion.getMonth() + 1;
-                    int day = outputOfConversion.getDay();
-                    Log.i("getNepaliDate", "year=" + year + ",month:" + month + ",day:" + day);
+                                        }
+                                    }
 
 
-                    TicketInfoList ticketInfoList = new TicketInfoList();
-                    ticketInfoList.ticketNumber = deviceId.substring(deviceId.length() - 4) + GeneralUtils.getDate() + "" + valueOfTickets;
-                    ticketInfoList.ticketPrice = String.valueOf(Integer.parseInt(priceList.price_value));
-                    ticketInfoList.ticketType = ticketType;
-                    ticketInfoList.ticketDate = GeneralUtils.getFullDate();
-                    ticketInfoList.ticketTime = GeneralUtils.getTime();
-                    ticketInfoList.ticketLat = latitude;
-                    ticketInfoList.ticketLng = longitude;
-                    ticketInfoList.helper_id = helperId;
+                                    total_tickets = preferences.getInt(UtilStrings.TOTAL_TICKETS, 0);
+                                    total_collections = preferences.getInt(UtilStrings.TOTAL_COLLECTIONS, 0);
+                                    deviceId = preferences.getString(UtilStrings.DEVICE_ID, "");
+                                    latitude = preferences.getString(UtilStrings.LATITUDE, "0.0");
+                                    longitude = preferences.getString(UtilStrings.LONGITUDE, "0.0");
+
+                                    total_tickets = total_tickets + 1;
+                                    total_collections = total_collections + Integer.parseInt(priceList.price_value);
+                                    preferences.edit().putInt(UtilStrings.TOTAL_TICKETS, total_tickets).apply();
+                                    preferences.edit().putInt(UtilStrings.TOTAL_COLLECTIONS, total_collections).apply();
+                                    Log.i("nearest_name", "" + nearest_name + ":" + total_tickets + "");
+
+                                    if (((TicketAndTracking) context).normalDiscountToggle.isOn()) {
+                                        ticketType = "discount";
+                                        discountType = "(छुट)";
+                                    } else {
+                                        ticketType = "full";
+                                        discountType = "(साधारण)";
+                                    }
+                                    ((TicketAndTracking) context).setTotal();
+                                    String valueOfTickets = "";
+                                    if (total_tickets < 10) {
+                                        valueOfTickets = "00" + String.valueOf(total_tickets);
+
+                                    } else if (total_tickets > 9 && total_tickets < 100) {
+                                        valueOfTickets = "0" + String.valueOf(total_tickets);
+                                    } else {
+                                        valueOfTickets = String.valueOf(total_tickets);
+                                    }
+                                    dateConverter = new DateConverter();
+                                    String dates[] = GeneralUtils.getFullDate().split("-");
+                                    int dateYear = Integer.parseInt(dates[0]);
+                                    int dateMonth = Integer.parseInt(dates[1]);
+                                    int dateDay = Integer.parseInt(dates[2]);
 
 
-                    databaseHelper.insertTicketInfo(ticketInfoList);
+                                    Model outputOfConversion = dateConverter.getNepaliDate(dateYear, dateMonth, dateDay);
+
+                                    int year = outputOfConversion.getYear();
+                                    int month = outputOfConversion.getMonth() + 1;
+                                    int day = outputOfConversion.getDay();
+                                    Log.i("getNepaliDate", "year=" + year + ",month:" + month + ",day:" + day);
+
+
+                                    TicketInfoList ticketInfoList = new TicketInfoList();
+                                    ticketInfoList.ticketNumber = deviceId.substring(deviceId.length() - 4) + GeneralUtils.getDate() + "" + valueOfTickets;
+                                    ticketInfoList.ticketPrice = String.valueOf(Integer.parseInt(priceList.price_value));
+                                    ticketInfoList.ticketType = ticketType;
+                                    ticketInfoList.ticketDate = GeneralUtils.getFullDate();
+                                    ticketInfoList.ticketTime = GeneralUtils.getTime();
+                                    ticketInfoList.ticketLat = latitude;
+                                    ticketInfoList.ticketLng = longitude;
+                                    ticketInfoList.helper_id = helperId;
+
+
+                                    databaseHelper.insertTicketInfo(ticketInfoList);
                /* try {
                     ((TicketAndTracking) context).escPrint("TICKET No.:" + ticketInfoList.ticketNumber + "\n" +
                             "Rs." + ticketInfoList.ticketPrice + " Type:" + ticketType + "\n" +
@@ -197,17 +210,32 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }*/
-                    //imageprint
-                    ((TicketAndTracking) context).mBitmap = drawText(busName + "\n" +
-                            "टि.न.:" + GeneralUtils.getUnicodeNumber(ticketInfoList.ticketNumber) + "\n" +
-                            "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.ticketPrice) + discountType + "\n" +
-                            nearest_name + "\n" +
-                            GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
-                            + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + "   " +
-                            GeneralUtils.getUnicodeNumber(GeneralUtils.getTime()), 380);
-                } else {
-                    ((TicketAndTracking) context).helperName.setText("सहायक छान्नुहोस् ।");
-                }
+                                    //imageprint
+                                   /* ((TicketAndTracking) context).mBitmap = drawText(busName + "\n" +
+                                            GeneralUtils.getUnicodeNumber(ticketInfoList.ticketNumber) + "\n" +
+                                            "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.ticketPrice) + discountType + "\n" +
+                                            nearest_name + "\n" +
+                                            GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
+                                            + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
+                                            GeneralUtils.getUnicodeNumber(GeneralUtils.getTime()), 380);*/
+                                } else {
+                                    ((TicketAndTracking) context).helperName.setText("सहायक छान्नुहोस् ।");
+                                }
+
+                                ///endProcess
+
+                            }
+                        });
+                alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "CANCEL",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+
+                            }
+                        });
+                alertDialog.show();
+
+
             }
         });
 
@@ -246,6 +274,7 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
 
         TextPaint textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG);
         textPaint.setStyle(Paint.Style.FILL);
+//        textPaint.setColor(Color.parseColor("#ffffff"));
         textPaint.setColor(Color.parseColor("#000000"));
         textPaint.setTextSize(45);
 
@@ -258,6 +287,7 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
         // Draw background
         Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG);
         paint.setStyle(Paint.Style.FILL);
+//        paint.setColor(Color.parseColor("#000000"));
         paint.setColor(Color.parseColor("#ffffff"));
         c.drawPaint(paint);
 

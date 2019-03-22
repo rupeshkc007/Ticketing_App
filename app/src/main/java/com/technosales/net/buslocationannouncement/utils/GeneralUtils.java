@@ -5,6 +5,7 @@ import android.content.Context;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Environment;
 import android.util.Log;
 
 import com.technosales.net.buslocationannouncement.R;
@@ -12,9 +13,12 @@ import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.pojo.PriceList;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -155,5 +159,26 @@ public class GeneralUtils {
 
         Log.i("getNepaliDate", "" + nepali_month);
         return nepali_month;
+    }
+
+    public static void createTicketFolder() {
+        File ticketFolder = new File(Environment.getExternalStorageDirectory() + "/TicketData");
+        if (!ticketFolder.isDirectory())
+            ticketFolder.mkdirs();
+    }
+
+    public static void writeInTxt(File txtFile, String data) {
+        try {
+            FileOutputStream fOut = new FileOutputStream(txtFile);
+            OutputStreamWriter myOutWriter = new OutputStreamWriter(fOut);
+            myOutWriter.append(data);
+
+            myOutWriter.close();
+
+            fOut.flush();
+            fOut.close();
+        } catch (IOException e) {
+            Log.e("Exception", "File write failed: " + e.toString());
+        }
     }
 }

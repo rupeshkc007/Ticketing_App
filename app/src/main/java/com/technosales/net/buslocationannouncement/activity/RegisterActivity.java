@@ -32,12 +32,12 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         sharedPreferences = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0);
 
         if (databaseHelper.routeStationLists().size() > 1) {
-            if (GeneralUtils.isNetworkAvailable(this)) {
+           /* if (GeneralUtils.isNetworkAvailable(this)) {
                 reg_device_number.setText(sharedPreferences.getString(UtilStrings.DEVICE_ID, ""));
-            } else {
+            } else {*/
                 startActivity(new Intent(this, TicketAndTracking.class));
                 finish();
-            }
+//            }
         }
 
 
