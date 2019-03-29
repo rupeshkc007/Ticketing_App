@@ -183,7 +183,7 @@ public class AnnounceActivity extends AppCompatActivity implements MapboxMap.OnM
         if (item.getItemId() == R.id.status) {
             startActivity(new Intent(this, StatusActivity.class));
             return true;
-        } else if (item.getItemId() == R.id.about) {
+        } else if (item.getItemId() == R.id.settings) {
             startActivity(new Intent(this, AboutActivity.class));
             return true;
         }

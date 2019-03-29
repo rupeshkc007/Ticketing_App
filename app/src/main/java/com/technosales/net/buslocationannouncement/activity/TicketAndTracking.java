@@ -126,7 +126,6 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
     private int totalCollections;
     private boolean reset = true;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -229,6 +228,24 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
                 alertDialog.show();
 
 
+            }
+        });
+
+        totalCollectionTickets.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                AlertDialog alertDialog = new AlertDialog.Builder(TicketAndTracking.this).create();
+                alertDialog.setTitle("Write To Text");
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                databaseHelper.writeToFile();
+
+                            }
+                        });
+                alertDialog.show();
+                return false;
             }
         });
 
@@ -609,12 +626,17 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
                 if (!reset) {
                     if (totalTickets != getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.SENT_TICKET, 0))
                         TicketInfoDataPush.pushBusData(TicketAndTracking.this, totalTickets, totalCollections);
+
+                    if (databaseHelper.listTickets().size() > 0) {
+                        databaseHelper.ticketInfoLists();
+                    }
+                } else {
+                    TicketInfoDataPush.resetData(TicketAndTracking.this);
                 }
 
 
-
-                /*totalRemainingTickets.setText(GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.listTickets().size())) + "\n" + GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.remainingAmount())));
-                if (databaseHelper.listTickets().size() > 0) {
+                totalRemainingTickets.setText(GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.listTickets().size())) + "\n" + GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.remainingAmount())));
+                /*if (databaseHelper.listTickets().size() > 0) {
                     boolean datasending = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getBoolean(UtilStrings.DATA_SENDING, false);
                     if (!datasending) {
                         databaseHelper.ticketInfoLists();

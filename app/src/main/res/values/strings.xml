@@ -60,8 +60,6 @@
     <string name="total_collections">जम्मा संकलन -रु.</string>
 
 
-
-
     <!--Public Value start-->
     <string name="UPC_A">UPC-A</string>
     <string name="UPC_E">UPC-E</string>
@@ -192,5 +190,7 @@
     <string name="spacing">Spacing:</string>
     <string name="enlarge">Enlarge:</string>
     <string name="save_setting">Saved</string>
+    <string name="menu_settings">Settings</string>
+    <string name="set_pricing">Set Pricing</string>
 
 </resources>

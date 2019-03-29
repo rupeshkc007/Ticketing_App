@@ -338,7 +338,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         cursor.close();
         context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putInt(UtilStrings.LAST_DATA_ID, id).apply();
-        /*TicketInfoDataPush.pushBusData(context, ticketInfoLists);*/
+        TicketInfoDataPush.pushTicketData(context, ticketInfoLists);
         /*TicketInfoDataPush.pushBusData(context, getJsonData(ticketInfoLists));*/
     }
 
@@ -441,6 +441,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             routeStationList.station_lng = c.getString(c.getColumnIndex(STATION_LNG));
 
             routeStationLists.add(routeStationList);
+            Log.i("getParams",routeStationList.station_name);
         }
         c.close();
 

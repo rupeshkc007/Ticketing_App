@@ -105,45 +105,45 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
         holder.priceCard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+///startProcess
+                preferences = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0);
+                databaseHelper = new DatabaseHelper(context);
+                routeStationLists = databaseHelper.routeStationLists();
 
+                float distance = 0;
+                float nearest = 0;
+                for (int i = 0; i < routeStationLists.size(); i++) {
+                    double startLat = Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"));
+                    double startLng = Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0"));
+                    double endLat = Double.parseDouble(routeStationLists.get(i).station_lat);
+                    double endLng = Double.parseDouble(routeStationLists.get(i).station_lng);
+                    distance = GeneralUtils.calculateDistance(startLat, startLng, endLat, endLng);
+                    if (i == 0) {
+                        nearest = distance;
+                    } else if (i > 0) {
+                        if (distance < nearest) {
+                            nearest = distance;
+                            nearest_name = routeStationLists.get(i).station_name;
+                        }
+
+                    }
+                }
 
                 AlertDialog alertDialog = new AlertDialog.Builder(context).create();
-                alertDialog.setTitle("CONFIRM");
-                alertDialog.setMessage("Print Ticket");
+                alertDialog.setTitle("रु. " + priceList.price_value+" "+nearest_name);
                 alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
 
-                                ///startProcess
-                                preferences = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0);
-                                databaseHelper = new DatabaseHelper(context);
 
                                 helperId = preferences.getString(UtilStrings.ID_HELPER, "");
                                 busName = preferences.getString(UtilStrings.DEVICE_NAME, "");
 
-                                routeStationLists = databaseHelper.routeStationLists();
 
                                 Log.i("isdataSending", "" + preferences.getBoolean(UtilStrings.DATA_SENDING, false));
-                                float distance = 0;
-                                float nearest = 0;
-                                if (helperId.length() > 0) {
-                                    for (int i = 0; i < routeStationLists.size(); i++) {
-                                        double startLat = Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"));
-                                        double startLng = Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0"));
-                                        double endLat = Double.parseDouble(routeStationLists.get(i).station_lat);
-                                        double endLng = Double.parseDouble(routeStationLists.get(i).station_lng);
-                                        distance = GeneralUtils.calculateDistance(startLat, startLng, endLat, endLng);
-                                        if (i == 0) {
-                                            nearest = distance;
-                                        } else if (i > 0) {
-                                            if (distance < nearest) {
-                                                nearest = distance;
-                                                nearest_name = routeStationLists.get(i).station_name;
-                                            }
 
-                                        }
-                                    }
+                                if (helperId.length() > 0) {
+                                    dialog.dismiss();
 
 
                                     total_tickets = preferences.getInt(UtilStrings.TOTAL_TICKETS, 0);
@@ -209,7 +209,11 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
                             GeneralUtils.getFullDate() + " " + GeneralUtils.getTime());
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
-                }*/
+
+
+                               }*/
+
+
                                     //imageprint
                                    /* ((TicketAndTracking) context).mBitmap = drawText(busName + "\n" +
                                             GeneralUtils.getUnicodeNumber(ticketInfoList.ticketNumber) + "\n" +

@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 public class TicketInfoDataPush {
-   /* public static void pushBusData(final Context context, final List<TicketInfoList> ticketInfoLists) {
+    public static void pushTicketData(final Context context, final List<TicketInfoList> ticketInfoLists) {
         context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.DATA_SENDING, true).apply();
         if (GeneralUtils.isNetworkAvailable(context)) {
             for (int i = 0; i < ticketInfoLists.size(); i++) {
@@ -59,7 +59,7 @@ public class TicketInfoDataPush {
 
         }
 
-    }*/
+    }
 
 
     public static void pushBusData(final Context context, final int totalTicks, final int totalCollection) {
@@ -74,7 +74,7 @@ public class TicketInfoDataPush {
                 @Override
                 public void callback(String url, JSONObject object, AjaxStatus status) {
                     super.callback(url, object, status);
-                    Log.i("getParams", object + ":" + params + "");
+                    Log.i("getParams", object + ":" + params + ":"+UtilStrings.UPDATE_TICKET);
                     if (object != null) {
                         if (object.optString("error").equals("false")) {
                             /*new DatabaseHelper(context).deleteFromLocalId(ticketInfoList.ticketNumber);*/
@@ -86,7 +86,7 @@ public class TicketInfoDataPush {
 
                     } else {
 
-                        pushBusData(context, totalTicks, totalCollection);
+                        /*pushBusData(context, totalTicks, totalCollection);*/
                     }
                 }
             });
@@ -105,7 +105,7 @@ public class TicketInfoDataPush {
                 @Override
                 public void callback(String url, JSONObject object, AjaxStatus status) {
                     super.callback(url, object, status);
-                    Log.i("getParams", object + ":" + params + "");
+                    Log.i("getParams", object + ":" + params + ":"+UtilStrings.RESET_DEVICE);
                     if (object != null) {
                         if (object.optString("error").equals("false")) {
                             context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.RESET, false).apply();
