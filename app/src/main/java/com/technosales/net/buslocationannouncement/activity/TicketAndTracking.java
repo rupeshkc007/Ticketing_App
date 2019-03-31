@@ -624,6 +624,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
 
                 reset = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getBoolean(UtilStrings.RESET, true);
                 if (!reset) {
+                    totalTickets = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.TOTAL_TICKETS, 0);
                     if (totalTickets != getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.SENT_TICKET, 0))
                         TicketInfoDataPush.pushBusData(TicketAndTracking.this, totalTickets, totalCollections);
 
