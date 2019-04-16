@@ -59,10 +59,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String STATION_NAME_ENG = "name_english";
     public static final String STATION_LAT = "latitude";
     public static final String STATION_LNG = "longitude";
+    public static final String STATION_DISTANCE = "station_distance";
 
 
     public static final String PRICE_TABLE = "price_table";
     public static final String PRICE_VALUE = "price_value";
+    public static final String PRICE_DISTANCE = "price_distance";
+    public static final String PRICE_MIN_DISTANCE = "price_min_distance";
 
 
     public static final String TICKET_TABLE = "ticket_table";
@@ -164,7 +167,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         db.execSQL("CREATE TABLE price_table (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                PRICE_VALUE + " TEXT)");
+                PRICE_VALUE + " TEXT,"+
+                PRICE_MIN_DISTANCE + " INTEGER,"+
+                PRICE_DISTANCE+" INTEGER)");
 
         db.execSQL("CREATE TABLE route_station (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -173,7 +178,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 STATION_NAME + " TEXT," +
                 STATION_NAME_ENG + " TEXT," +
                 STATION_LAT + " TEXT," +
-                STATION_LNG + " TEXT)");
+                STATION_LNG + " TEXT," +
+                STATION_DISTANCE + " FLOAT)");
         db.execSQL("CREATE TABLE helper_table (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 HELPER_ID + " TEXT," +
@@ -228,9 +234,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         contentValues.put(STATION_NAME_ENG, routeStationList.station_name_eng);
         contentValues.put(STATION_LAT, routeStationList.station_lat);
         contentValues.put(STATION_LNG, routeStationList.station_lng);
+        contentValues.put(STATION_DISTANCE, routeStationList.station_distance);
         sqLiteDatabase.insert(ROUTE_STATION_TABLE, null, contentValues);
 
-        Log.i("routeStation", "" + routeStationList.station_order + ":" + routeStationList.station_name_eng);
+        Log.i("routeStation", "" + routeStationList.station_name + ":" + routeStationList.station_distance);
     }
 
     public void insertHelpers(ContentValues contentValues) {
@@ -264,6 +271,38 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (!datasending) {
             ticketInfoLists();
         }*/
+    }
+
+    public float distancesFromStart() {
+        float total = 0;
+        Cursor c = getReadableDatabase().rawQuery("SELECT " + STATION_DISTANCE + " FROM " + ROUTE_STATION_TABLE, null);
+        while (c.moveToNext()) {
+            total =c.getFloat(c.getColumnIndex(STATION_DISTANCE));
+
+        }
+        c.close();
+/*
+        Log.i("routeStation", "total-" +total);
+*/
+        return total;
+    }
+    public double recentStationLat(int order){
+        double lat = 0.0;
+        Cursor c = getReadableDatabase().rawQuery("SELECT " + STATION_LAT + " FROM " + ROUTE_STATION_TABLE+ " WHERE "+STATION_ORDER+" ="+order, null);
+        while (c.moveToNext()){
+            lat = Double.parseDouble(c.getString(c.getColumnIndex(STATION_LAT)));
+        }
+        c.close();
+        return lat;
+    }
+    public double recentStationLng(int order){
+        double lat = 0.0;
+        Cursor c = getReadableDatabase().rawQuery("SELECT " + STATION_LNG + " FROM " + ROUTE_STATION_TABLE+ " WHERE "+STATION_ORDER+" ="+order, null);
+        while (c.moveToNext()){
+            lat = Double.parseDouble(c.getString(c.getColumnIndex(STATION_LNG)));
+        }
+        c.close();
+        return lat;
     }
 
     public void insertTicketTxt(ContentValues contentValues) {
@@ -321,7 +360,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         int id = 0;
         List<TicketInfoList> ticketInfoLists = new ArrayList<>();
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
-        Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM " + TICKET_TABLE+ " LIMIT 1", null);
+        Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM " + TICKET_TABLE + " LIMIT 1", null);
         while (cursor.moveToNext()) {
             TicketInfoList ticketInfoList = new TicketInfoList();
             ticketInfoList.ticketNumber = cursor.getString(cursor.getColumnIndex(TICKET_NUMBER));
@@ -419,6 +458,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         while (c.moveToNext()) {
             PriceList priceList = new PriceList();
             priceList.price_value = c.getString(c.getColumnIndex(PRICE_VALUE));
+            priceList.price_min_distance = c.getInt(c.getColumnIndex(PRICE_MIN_DISTANCE));
+            priceList.price_distance = c.getInt(c.getColumnIndex(PRICE_DISTANCE));
             priceLists.add(priceList);
         }
         c.close();
@@ -439,9 +480,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             routeStationList.station_name_eng = c.getString(c.getColumnIndex(STATION_NAME_ENG));
             routeStationList.station_lat = c.getString(c.getColumnIndex(STATION_LAT));
             routeStationList.station_lng = c.getString(c.getColumnIndex(STATION_LNG));
+            routeStationList.station_distance = c.getFloat(c.getColumnIndex(STATION_DISTANCE));
 
             routeStationLists.add(routeStationList);
-            Log.i("getParams",routeStationList.station_name);
+            Log.i("getParams", routeStationList.station_name);
         }
         c.close();
 

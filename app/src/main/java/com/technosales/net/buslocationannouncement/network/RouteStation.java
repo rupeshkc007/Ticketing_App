@@ -33,7 +33,6 @@ public class RouteStation {
                     super.callback(url, object, status);
                     Log.i("getObject", "" + object);
                     if (object != null) {
-
                         String error = object.optString("error");
                         JSONArray data = object.optJSONArray("data");
                         int order = 0;
@@ -41,6 +40,8 @@ public class RouteStation {
                         for (int i = 0; i < data.length(); i++) {
                             JSONObject dataobj = data.optJSONObject(i);
                             String sts = dataobj.optString("status");
+
+
                             if (sts.equals("0")) {
                                 order++;
                                 RouteStationList routeStationList = new RouteStationList();
@@ -51,6 +52,14 @@ public class RouteStation {
                                 routeStationList.station_lat = dataobj.optString("latitude");
                                 routeStationList.station_lng = dataobj.optString("longitude");
 
+
+                                if (i == 0) {
+                                    routeStationList.station_distance = 0;
+                                } else {
+
+
+                                    routeStationList.station_distance =/*databaseHelper.distancesFromStart()+ */GeneralUtils.calculateDistance(databaseHelper.recentStationLat(order-1), databaseHelper.recentStationLng(order-1), Double.parseDouble(routeStationList.station_lat), Double.parseDouble(routeStationList.station_lng));
+                                }
                                 databaseHelper.insertStations(routeStationList);
 
 

@@ -6,4 +6,5 @@ public class RouteStationList {
 
     public String station_id, station_name,station_name_eng, station_lat, station_lng;
     public int station_order;
+    public float station_distance;
 }

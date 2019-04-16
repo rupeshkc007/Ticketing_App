@@ -24,7 +24,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.technosales.net.buslocationannouncement.R;
-import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
@@ -120,7 +119,7 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
         if (position != null) {
             write(position);
 
-            Toast.makeText(context,"", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "", Toast.LENGTH_SHORT).show();
             context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LATITUDE, String.valueOf(position.getLatitude())).apply();
             context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LONGITUDE, String.valueOf(position.getLongitude())).apply();
 
@@ -137,22 +136,33 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
                         if (preOrder < currentOrder) {
                             if (currentOrder == routeStationLists.size()) {
                                 nextStation = databaseHelper.nextStation(currentOrder - 1);
+                                context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, false).apply();
                             } else {
                                 nextStation = databaseHelper.nextStation(currentOrder + 1);
+                                context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, true).apply();
+
                             }
                         } else if (preOrder > currentOrder && databaseHelper.lastStation(currentOrderId) == routeStationLists.size()) {
                             nextStation = databaseHelper.nextStation(currentOrder - 1);
+                            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, false).apply();
+
                         } else {
                             if (databaseHelper.getDouble(routeStationList.station_id) > 1) {
 
                                 currentOrder = databaseHelper.nextStationId(routeStationList.station_id);
                                 nextStation = databaseHelper.nextStation(currentOrder + 1);
+                                context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, true).apply();
+
 
                             } else {
                                 if (currentOrder != 1) {
                                     nextStation = databaseHelper.nextStation(currentOrder - 1);
+                                    context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, false).apply();
+
                                 } else {
                                     nextStation = databaseHelper.nextStation(currentOrder + 1);
+                                    context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.FORWARD, true).apply();
+
                                 }
                             }
 

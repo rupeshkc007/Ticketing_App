@@ -48,6 +48,7 @@ public class GeneralUtils {
 
         distance = startingLocation.distanceTo(endingLocation);
 
+
         return distance;
     }
 
@@ -61,8 +62,11 @@ public class GeneralUtils {
             try {
                 while ((line = br.readLine()) != null) {
 
+                    String[] priceDistance = line.split("-");
                     ContentValues contentValues = new ContentValues();
-                    contentValues.put(DatabaseHelper.PRICE_VALUE, line);
+                    contentValues.put(DatabaseHelper.PRICE_VALUE, priceDistance[0]);
+                    contentValues.put(DatabaseHelper.PRICE_MIN_DISTANCE, priceDistance[1]);
+                    contentValues.put(DatabaseHelper.PRICE_DISTANCE, priceDistance[2]);
                     databaseHelper.insertPrice(contentValues);
                 }
             } catch (IOException e) {

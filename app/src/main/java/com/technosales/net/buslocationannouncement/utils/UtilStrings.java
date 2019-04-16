@@ -17,6 +17,7 @@ public class UtilStrings {
     public static final String ID_HELPER = "helper_id";
     public static final String RESET = "reset";
     public static final String SENT_TICKET = "sent_ticket";
+    public static final String FORWARD = "rev_for";
 
 
     //    public static final String MAIN_URL = "http://172.16.1.131:85/route_api/public/api/";//server
