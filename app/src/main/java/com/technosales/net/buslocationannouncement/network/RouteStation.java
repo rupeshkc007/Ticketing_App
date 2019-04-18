@@ -37,10 +37,17 @@ public class RouteStation {
                         JSONArray data = object.optJSONArray("data");
                         int order = 0;
                         databaseHelper.clearStations();
+
+
+                        if (data.optJSONObject(0).optString("station_id").equals(data.optJSONObject(data.length() - 1).optString("station_id"))) {
+                            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putInt(UtilStrings.ROUTE_TYPE, UtilStrings.RING_ROAD).apply();
+                        } else {
+                            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putInt(UtilStrings.ROUTE_TYPE, UtilStrings.NON_RING_ROAD).apply();
+                        }
                         for (int i = 0; i < data.length(); i++) {
                             JSONObject dataobj = data.optJSONObject(i);
                             String sts = dataobj.optString("status");
-
+                            int routeType = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.ROUTE_TYPE, UtilStrings.NON_RING_ROAD);
 
                             if (sts.equals("0")) {
                                 order++;
@@ -57,8 +64,12 @@ public class RouteStation {
                                     routeStationList.station_distance = 0;
                                 } else {
 
+                                    if (routeType == UtilStrings.RING_ROAD) {
+                                        routeStationList.station_distance =/*databaseHelper.distancesFromStart()+ */GeneralUtils.calculateDistance(databaseHelper.recentStationLat(order - 1), databaseHelper.recentStationLng(order - 1), Double.parseDouble(routeStationList.station_lat), Double.parseDouble(routeStationList.station_lng));
+                                    } else {
+                                        routeStationList.station_distance =databaseHelper.distancesFromStart()+ GeneralUtils.calculateDistance(databaseHelper.recentStationLat(order - 1), databaseHelper.recentStationLng(order - 1), Double.parseDouble(routeStationList.station_lat), Double.parseDouble(routeStationList.station_lng));
 
-                                    routeStationList.station_distance =/*databaseHelper.distancesFromStart()+ */GeneralUtils.calculateDistance(databaseHelper.recentStationLat(order-1), databaseHelper.recentStationLng(order-1), Double.parseDouble(routeStationList.station_lat), Double.parseDouble(routeStationList.station_lng));
+                                    }
                                 }
                                 databaseHelper.insertStations(routeStationList);
 

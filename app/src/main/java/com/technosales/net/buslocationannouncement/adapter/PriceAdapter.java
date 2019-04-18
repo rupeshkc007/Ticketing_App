@@ -1,6 +1,6 @@
 package com.technosales.net.buslocationannouncement.adapter;
 
-import android.annotation.SuppressLint;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -64,13 +64,10 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
     private DatabaseHelper databaseHelper;
     private List<RouteStationList> routeStationLists = new ArrayList<>();
     private String nearest_name = "";
-    private float nearestDistance;
     private DateConverter dateConverter;
     private String helperId;
     private String busName;
     private String discountType;
-    private boolean forward;
-    private int orderPos = 0;
 
 
     public PriceAdapter(List<PriceList> priceLists, Context context) {
@@ -109,107 +106,34 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
             }
         });*/
         holder.priceCard.setOnClickListener(new View.OnClickListener() {
-            @SuppressLint("LogNotTimber")
             @Override
             public void onClick(View v) {
-///startProcess
-                preferences = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0);
-                databaseHelper = new DatabaseHelper(context);
-                routeStationLists = databaseHelper.routeStationLists();
+                        ///startProcess
+                                                preferences = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0);
+                                databaseHelper = new DatabaseHelper(context);
+                                routeStationLists = databaseHelper.routeStationLists();
 
-                float distance = 0;
-                float nearest = 0;
-                for (int i = 0; i < routeStationLists.size(); i++) {
-                    double startLat = Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"));
-                    double startLng = Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0"));
-                    double endLat = Double.parseDouble(routeStationLists.get(i).station_lat);
-                    double endLng = Double.parseDouble(routeStationLists.get(i).station_lng);
-                    distance = GeneralUtils.calculateDistance(startLat, startLng, endLat, endLng);
-                    if (i == 0) {
-                        nearest = distance;
-                    } else {
-                        if (distance < nearest) {
-                            nearest = distance;
-                            nearest_name = routeStationLists.get(i).station_name;
-                            /*nearestDistance = routeStationLists.get(i).station_distance;*/
-                            orderPos = routeStationLists.get(i).station_order;
+                                        float distance = 0;
+                                float nearest = 0;
+                                for (int i = 0; i < routeStationLists.size(); i++) {
+                                       double startLat = Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"));
+                                        double startLng = Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0"));
+                                        double endLat = Double.parseDouble(routeStationLists.get(i).station_lat);
+                                        double endLng = Double.parseDouble(routeStationLists.get(i).station_lng);
+                                        distance = GeneralUtils.calculateDistance(startLat, startLng, endLat, endLng);
+                                        if (i == 0) {
+                                                nearest = distance;
+                                            } else if (i > 0) {
+                                               if (distance < nearest) {
+                                                        nearest = distance;
+                                                        nearest_name = routeStationLists.get(i).station_name;
+                                                   }
 
-                        }
-
-                    }
-                }
-
-//                forward = preferences.getBoolean(UtilStrings.FORWARD, true);
-                forward =true; //static
-                final ArrayList<String> stationsGetoff = new ArrayList<>();
-
-                nearestDistance = 0;
-                for (int i = 0; i < routeStationLists.size(); i++) {
-                    if (forward) {
-                        if (i > orderPos) {
-                            if (nearestDistance < priceList.price_distance /*&& nearestDistance > priceList.price_min_distance*/) {
-                                nearestDistance = (nearestDistance + routeStationLists.get(i).station_distance );
-                                if (nearestDistance > priceList.price_min_distance && nearestDistance < priceList.price_distance) {
-
-                                    stationsGetoff.add(routeStationLists.get(i).station_name);
-
-                                }
-                                if (i == routeStationLists.size() - 1) {
-                                    for (int j = 1; j < routeStationLists.size(); j++) {
-                                        nearestDistance = (nearestDistance + routeStationLists.get(j).station_distance);
-                                        if (nearestDistance > priceList.price_min_distance && nearestDistance < priceList.price_distance)
-                                            stationsGetoff.add(routeStationLists.get(j).station_name);
-                                    }
-                                }
-                            }
-
-                        }
-                    } else {
-
-                        if (i < orderPos) {
-                            if (nearestDistance < priceList.price_distance /*&& nearestDistance > priceList.price_min_distance*/) {
-                                nearestDistance = (nearestDistance + routeStationLists.get(i).station_distance);
-                                if (nearestDistance > priceList.price_min_distance && nearestDistance < priceList.price_distance) {
-                                    stationsGetoff.add(routeStationLists.get(i).station_name);
-                                }
-                                for (int j = routeStationLists.size() - 1; j >-1; j--) {
-                                    if (j == routeStationLists.size() - 1) {
-                                        nearestDistance = nearestDistance + GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(1).station_lat), Double.parseDouble(routeStationLists.get(1).station_lng), Double.parseDouble(routeStationLists.get(j).station_lat), Double.parseDouble(routeStationLists.get(j).station_lng));
-                                    } else {
-                                        nearestDistance = nearestDistance + GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(j + 1).station_lat), Double.parseDouble(routeStationLists.get(j + 1).station_lng), Double.parseDouble(routeStationLists.get(j).station_lat), Double.parseDouble(routeStationLists.get(j).station_lng));
-                                    }
-                                    /*nearestDistance = (nearestDistance + routeStationLists.get(j).station_distance / 1000);*/
-                                    if (nearestDistance > priceList.price_min_distance && nearestDistance < priceList.price_distance)
-                                        stationsGetoff.add(routeStationLists.get(j).station_name);
-                                }
-
-                            }
-
-                        }
-                    }
-
-                }
-              /*  for (int i = 0; i < routeStationLists.size(); i++) {
-
-                    if (forward) {
-
-                        if (i >= orderPos) {
-                            if (priceList.price_distance >= Math.abs(nearestDistance - routeStationLists.get(i).station_distance)/1000 && priceList.price_min_distance<=Math.abs(nearestDistance - routeStationLists.get(i).station_distance)/1000) {
-                                stationsGetoff.add(routeStationLists.get(i).station_name);
-                            }
-                        }
-                    } else {
-                        if (i <= orderPos) {
-                            if (priceList.price_distance >= Math.abs(nearestDistance - routeStationLists.get(i).station_distance)/1000 && priceList.price_min_distance<=Math.abs(nearestDistance - routeStationLists.get(i).station_distance)/1000) {
-                                stationsGetoff.add(routeStationLists.get(i).station_name);
-                            }
-                        }
-                    }
-                }*/
-                Log.i("stationsGetoff", nearestDistance + "-" + stationsGetoff);
+                                                    }
+                                   }
 
                 AlertDialog alertDialog = new AlertDialog.Builder(context).create();
-                alertDialog.setTitle("रु. " + priceList.price_value + " " + nearest_name);
+                               alertDialog.setTitle("रु. " + priceList.price_value+" "+nearest_name);
                 alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
@@ -221,8 +145,10 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
 
                                 Log.i("isdataSending", "" + preferences.getBoolean(UtilStrings.DATA_SENDING, false));
 
+
                                 if (helperId.length() > 0) {
-                                    dialog.dismiss();
+
+                                                                       dialog.dismiss();
 
 
                                     total_tickets = preferences.getInt(UtilStrings.TOTAL_TICKETS, 0);
@@ -281,46 +207,45 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
 
 
                                     databaseHelper.insertTicketInfo(ticketInfoList);
-               /* try {
-                    ((TicketAndTracking) context).escPrint("TICKET No.:" + ticketInfoList.ticketNumber + "\n" +
-                            "Rs." + ticketInfoList.ticketPrice + " Type:" + ticketType + "\n" +
-                            nearest_name + "\n" +
-                            GeneralUtils.getFullDate() + " " + GeneralUtils.getTime());
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
+                /* try {
+                     ((TicketAndTracking) context).escPrint("TICKET No.:" + ticketInfoList.ticketNumber + "\n" +
+                             "Rs." + ticketInfoList.ticketPrice + " Type:" + ticketType + "\n" +
+                             nearest_name + "\n" +
+                             GeneralUtils.getFullDate() + " " + GeneralUtils.getTime());
+                 } catch (UnsupportedEncodingException e) {
+                     e.printStackTrace();
 
 
-                               }*/
+                                                                                   }*/
 
-
-                                    //imageprint
-                                   /* ((TicketAndTracking) context).mBitmap = drawText(busName + "\n" +
-                                            GeneralUtils.getUnicodeNumber(ticketInfoList.ticketNumber) + "\n" +
-                                            "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.ticketPrice) + discountType + "\n" +
-                                            nearest_name + "\n" +
-                                            GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
-                                            + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
-                                            GeneralUtils.getUnicodeNumber(GeneralUtils.getTime()), 380);*/
-                                } else {
-                                    ((TicketAndTracking) context).helperName.setText("सहायक छान्नुहोस् ।");
-                                }
-
-                                ///endProcess
-
+                                //imageprint
+                                    /* ((TicketAndTracking) context).mBitmap = drawText(busName + "\n" +
+                                             GeneralUtils.getUnicodeNumber(ticketInfoList.ticketNumber) + "\n" +
+                                             "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.ticketPrice) + discountType + "\n" +
+                                             nearest_name + "\n" +
+                                             GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
+                                             + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
+                                             GeneralUtils.getUnicodeNumber(GeneralUtils.getTime()), 380);*/
+                            } else {
+                                ((TicketAndTracking) context).helperName.setText("सहायक छान्नुहोस् ।");
                             }
-                        });
-                alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "CANCEL",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss();
 
-                            }
-                        });
-                alertDialog.show();
+                            ///endProcess
+
+                        }
+            });
+                 alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "CANCEL",
+                    new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+
+                }
+            });
+                 alertDialog.show();
 
 
-            }
-        });
+        }
+    });
 
 
     }

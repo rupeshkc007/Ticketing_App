@@ -65,6 +65,7 @@ import com.rt.printerlibrary.setting.CommonSetting;
 import com.rt.printerlibrary.setting.TextSetting;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.adapter.PriceAdapter;
+import com.technosales.net.buslocationannouncement.adapter.PriceAdapterPlaces;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.network.TicketInfoDataPush;
 import com.technosales.net.buslocationannouncement.pojo.HelperList;
@@ -264,7 +265,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         /*showUSBDeviceChooseDialog();    //use for voting*/
 
 
-        /*showBluetoothDeviceChooseDialog();*/
+//        showBluetoothDeviceChooseDialog();
     }
 
     private void isToday() {
