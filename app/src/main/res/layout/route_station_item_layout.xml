@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_margin="2dp"
+    android:id="@+id/rl_route_station"
+    >
 
     <TextView
+        android:id="@+id/routeStationItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/price_item_bg"
-        android:textColor="@color/text_color_normal"
+        android:textColor="@color/text_color"
         android:textSize="20sp"
-        android:id="@+id/routeStationItem"/>
+        android:padding="5dp"
+        android:textAlignment="center"/>
 
 </RelativeLayout>

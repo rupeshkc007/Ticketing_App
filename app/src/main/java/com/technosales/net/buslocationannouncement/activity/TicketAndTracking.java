@@ -32,6 +32,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.github.angads25.toggle.LabeledSwitch;
@@ -66,6 +67,7 @@ import com.rt.printerlibrary.setting.TextSetting;
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.adapter.PriceAdapter;
 import com.technosales.net.buslocationannouncement.adapter.PriceAdapterPlaces;
+import com.technosales.net.buslocationannouncement.adapter.PriceAdapterPrices;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.network.TicketInfoDataPush;
 import com.technosales.net.buslocationannouncement.pojo.HelperList;
@@ -126,6 +128,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
     private int totalTickets;
     private int totalCollections;
     private boolean reset = true;
+    private int mode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -160,6 +163,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         mainToolBar.setOverflowIcon(drawable);
 
         helperName.setText(getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.NAME_HELPER, ""));
+        mode = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.MODE, UtilStrings.MODE_3);
 
 
         route_name.setSelected(true);
@@ -171,7 +175,13 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         /*normalDiscountToggle.setColorOff(getResources().getColor(android.R.color.black));
         normalDiscountToggle.setColorOn(getResources().getColor(R.color.colorAccent));*/
 
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 4);
+        int spanCount = 4;
+
+        if (mode == UtilStrings.MODE_3) {
+            spanCount = 1;
+        }
+
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, spanCount);
         priceListView.setLayoutManager(gridLayoutManager);
         priceListView.setHasFixedSize(true);
 
@@ -179,7 +189,13 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         if (priceLists.size() == 0) {
             priceLists = GeneralUtils.priceCsv(this);
         }
-        priceListView.setAdapter(new PriceAdapter(priceLists, this));
+        if (mode == UtilStrings.MODE_1) {
+            priceListView.setAdapter(new PriceAdapter(priceLists, this));
+        } else if (mode == UtilStrings.MODE_2) {
+            priceListView.setAdapter(new PriceAdapterPlaces(priceLists, this));
+        } else {
+            priceListView.setAdapter(new PriceAdapterPrices(databaseHelper.routeStationLists(), this));
+        }
 
 
         normalDiscountToggle.setOnToggledListener(new OnToggledListener() {
@@ -196,9 +212,17 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
                 }*/
 
                 if (isOn) {
-                    setPriceLists(0);
+                    if (mode != UtilStrings.MODE_3) {
+                        setPriceLists(0);
+                    } else {
+                        priceListView.setAdapter(new PriceAdapterPrices(databaseHelper.routeStationLists(), TicketAndTracking.this));
+                    }
                 } else {
-                    setPriceLists(4);
+                    if (mode != UtilStrings.MODE_3) {
+                        setPriceLists(4);
+                    } else {
+                        priceListView.setAdapter(new PriceAdapterPrices(databaseHelper.routeStationLists(), TicketAndTracking.this));
+                    }
                 }
 
 
@@ -265,7 +289,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         /*showUSBDeviceChooseDialog();    //use for voting*/
 
 
-//        showBluetoothDeviceChooseDialog();
+        /*showBluetoothDeviceChooseDialog();*/
     }
 
     private void isToday() {
@@ -655,4 +679,6 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         rTicker.run();
 
     }
+
+
 }

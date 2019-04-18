@@ -167,9 +167,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         db.execSQL("CREATE TABLE price_table (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                PRICE_VALUE + " TEXT,"+
-                PRICE_MIN_DISTANCE + " INTEGER,"+
-                PRICE_DISTANCE+" INTEGER)");
+                PRICE_VALUE + " TEXT," +
+                PRICE_MIN_DISTANCE + " INTEGER," +
+                PRICE_DISTANCE + " INTEGER)");
 
         db.execSQL("CREATE TABLE route_station (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -277,7 +277,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         float total = 0;
         Cursor c = getReadableDatabase().rawQuery("SELECT " + STATION_DISTANCE + " FROM " + ROUTE_STATION_TABLE, null);
         while (c.moveToNext()) {
-            total =c.getFloat(c.getColumnIndex(STATION_DISTANCE));
+            total = c.getFloat(c.getColumnIndex(STATION_DISTANCE));
 
         }
         c.close();
@@ -286,19 +286,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 */
         return total;
     }
-    public double recentStationLat(int order){
+
+    public double recentStationLat(int order) {
         double lat = 0.0;
-        Cursor c = getReadableDatabase().rawQuery("SELECT " + STATION_LAT + " FROM " + ROUTE_STATION_TABLE+ " WHERE "+STATION_ORDER+" ="+order, null);
-        while (c.moveToNext()){
+        Cursor c = getReadableDatabase().rawQuery("SELECT " + STATION_LAT + " FROM " + ROUTE_STATION_TABLE + " WHERE " + STATION_ORDER + " =" + order, null);
+        while (c.moveToNext()) {
             lat = Double.parseDouble(c.getString(c.getColumnIndex(STATION_LAT)));
         }
         c.close();
         return lat;
     }
-    public double recentStationLng(int order){
+
+    public double recentStationLng(int order) {
         double lat = 0.0;
-        Cursor c = getReadableDatabase().rawQuery("SELECT " + STATION_LNG + " FROM " + ROUTE_STATION_TABLE+ " WHERE "+STATION_ORDER+" ="+order, null);
-        while (c.moveToNext()){
+        Cursor c = getReadableDatabase().rawQuery("SELECT " + STATION_LNG + " FROM " + ROUTE_STATION_TABLE + " WHERE " + STATION_ORDER + " =" + order, null);
+        while (c.moveToNext()) {
             lat = Double.parseDouble(c.getString(c.getColumnIndex(STATION_LNG)));
         }
         c.close();
@@ -465,6 +467,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         c.close();
         return priceLists;
 
+    }
+
+    public String priveWrtDistance(float distance) {
+        String price = "";
+        Cursor c = getWritableDatabase().rawQuery("SELECT " + PRICE_VALUE + " FROM " + PRICE_TABLE + " WHERE " + PRICE_MIN_DISTANCE + " < " + distance + " AND " + PRICE_DISTANCE + " > " + distance, null);
+        while (c.moveToNext()) {
+            price = c.getString(c.getColumnIndex(PRICE_VALUE));
+        }
+        c.close();
+        return price;
     }
 
     public List<RouteStationList> routeStationLists() {
