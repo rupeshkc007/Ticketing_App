@@ -64,6 +64,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public static final String PRICE_TABLE = "price_table";
     public static final String PRICE_VALUE = "price_value";
+    public static final String PRICE_DISCOUNT_VALUE = "price_discount_value";
     public static final String PRICE_DISTANCE = "price_distance";
     public static final String PRICE_MIN_DISTANCE = "price_min_distance";
 
@@ -168,6 +169,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE price_table (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 PRICE_VALUE + " TEXT," +
+                PRICE_DISCOUNT_VALUE + " TEXT," +
                 PRICE_MIN_DISTANCE + " INTEGER," +
                 PRICE_DISTANCE + " INTEGER)");
 
@@ -452,14 +454,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         getWritableDatabase().execSQL(sql);
     }
 
-    public List<PriceList> priceLists(int id) {
+    public List<PriceList> priceLists() {
         List<PriceList> priceLists = new ArrayList<>();
 
-        String sql = "SELECT * FROM " + PRICE_TABLE + " WHERE id >" + id;
+        String sql = "SELECT * FROM " + PRICE_TABLE;
         Cursor c = getWritableDatabase().rawQuery(sql, null);
         while (c.moveToNext()) {
             PriceList priceList = new PriceList();
             priceList.price_value = c.getString(c.getColumnIndex(PRICE_VALUE));
+            priceList.price_discount_value = c.getString(c.getColumnIndex(PRICE_DISCOUNT_VALUE));
             priceList.price_min_distance = c.getInt(c.getColumnIndex(PRICE_MIN_DISTANCE));
             priceList.price_distance = c.getInt(c.getColumnIndex(PRICE_DISTANCE));
             priceLists.add(priceList);
@@ -469,11 +472,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     }
 
-    public String priveWrtDistance(float distance) {
+    public String priceWrtDistance(float distance,boolean isOn) {
         String price = "";
-        Cursor c = getWritableDatabase().rawQuery("SELECT " + PRICE_VALUE + " FROM " + PRICE_TABLE + " WHERE " + PRICE_MIN_DISTANCE + " < " + distance + " AND " + PRICE_DISTANCE + " > " + distance, null);
+        Cursor c = getWritableDatabase().rawQuery("SELECT * FROM " + PRICE_TABLE + " WHERE " + PRICE_MIN_DISTANCE + " <= " + distance + " AND " + PRICE_DISTANCE + " >= " + distance, null);
         while (c.moveToNext()) {
-            price = c.getString(c.getColumnIndex(PRICE_VALUE));
+            if (isOn){
+
+                price = c.getString(c.getColumnIndex(PRICE_DISCOUNT_VALUE));
+            }else {
+                price = c.getString(c.getColumnIndex(PRICE_VALUE));
+            }
         }
         c.close();
         return price;

@@ -192,5 +192,8 @@
     <string name="save_setting">Saved</string>
     <string name="menu_settings">Settings</string>
     <string name="set_pricing">Set Pricing</string>
+    <string name="normal_mode">Normal</string>
+    <string name="places_mode">Places</string>
+    <string name="price_mode">Price</string>
 
 </resources>

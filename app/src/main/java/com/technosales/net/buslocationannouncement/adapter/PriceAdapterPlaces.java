@@ -88,14 +88,17 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
 
         final PriceList priceList = priceLists.get(position);
 
-        holder.price_value.setText(priceList.price_value);
+        /*holder.price_value.setText(priceList.price_value);*/
 
         if (((TicketAndTracking) context).normalDiscountToggle.isOn()) {
+            holder.price_value.setText(priceList.price_discount_value);
+            priceList.price_value =priceList.price_discount_value;
             holder.price_value.setTextColor(context.getResources().getColorStateList(R.color.discount_txt_color));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 holder.price_value.setBackground(ContextCompat.getDrawable(context, R.drawable.discount_price_bg));
             }
         } else {
+            holder.price_value.setText(priceList.price_value);
         }
        /* holder.price_value.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -148,7 +151,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                 if (route_type==UtilStrings.RING_ROAD){
                     for (int i = 0; i < routeStationLists.size(); i++) {
                         if (forward) {
-                            if (i > orderPos) {
+                            if (i >= orderPos) {
                                 if (nearestDistance < priceList.price_distance /*&& nearestDistance > priceList.price_min_distance*/) {
                                     nearestDistance = (nearestDistance + routeStationLists.get(i).station_distance);
                                     if (nearestDistance > priceList.price_min_distance && nearestDistance < priceList.price_distance) {
@@ -168,7 +171,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                             }
                         } else {
 
-                            if (i < orderPos) {
+                            if (i <= orderPos) {
                                 if (nearestDistance < priceList.price_distance /*&& nearestDistance > priceList.price_min_distance*/) {
                                     nearestDistance = (nearestDistance + routeStationLists.get(i).station_distance);
                                     if (nearestDistance > priceList.price_min_distance && nearestDistance < priceList.price_distance) {
@@ -381,13 +384,13 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
 
 
                             //imageprint
-                            /*((TicketAndTracking) context).mBitmap = drawText(busName + "\n" +
+                            ((TicketAndTracking) context).mBitmap = drawText(busName + "\n" +
                                     GeneralUtils.getUnicodeNumber(ticketInfoList.ticketNumber) + "\n" +
                                     "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.ticketPrice) + discountType + "\n" +
                                     nearest_name + "-" + toGetOff + "\n" +
                                     GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
-                                    GeneralUtils.getUnicodeNumber(GeneralUtils.getTime()), 380);*/
+                                    GeneralUtils.getUnicodeNumber(GeneralUtils.getTime()), 380);
                         } else {
                             ((TicketAndTracking) context).helperName.setText("सहायक छान्नुहोस् ।");
                         }

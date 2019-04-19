@@ -78,7 +78,7 @@ public class GeneralUtils {
             e.printStackTrace();
         }
 
-        return databaseHelper.priceLists(4);
+        return databaseHelper.priceLists();
     }
 
     public static String getDate() {

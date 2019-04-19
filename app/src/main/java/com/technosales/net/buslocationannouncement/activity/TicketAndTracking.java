@@ -31,7 +31,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -72,6 +76,7 @@ import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.network.TicketInfoDataPush;
 import com.technosales.net.buslocationannouncement.pojo.HelperList;
 import com.technosales.net.buslocationannouncement.pojo.PriceList;
+import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.printer.BluetoothDeviceChooseDialog;
 import com.technosales.net.buslocationannouncement.printer.UsbDeviceChooseDialog;
 import com.technosales.net.buslocationannouncement.printer.apps.BaseActivity;
@@ -111,6 +116,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
     public TextView totalRemainingTickets;
     private TextView route_name;
     public TextView helperName;
+    private TextView mode_selector;
 
 
     /////
@@ -129,6 +135,12 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
     private int totalCollections;
     private boolean reset = true;
     private int mode;
+    private GridLayoutManager gridLayoutManager;
+
+    int pastVisiblesItems, visibleItemCount, totalItemCount;
+    private PriceAdapterPrices priceAdapterPrices;
+    private List<RouteStationList> routeStationListsForInfinite;
+    int listVisiblePosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -157,6 +169,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         route_name = findViewById(R.id.route_name);
         helperName = findViewById(R.id.helperName);
         mainToolBar = findViewById(R.id.mainToolBar);
+        mode_selector = findViewById(R.id.mode_selector);
 
         setSupportActionBar(mainToolBar);
         Drawable drawable = ContextCompat.getDrawable(getApplicationContext(), R.mipmap.helper_choose);
@@ -164,6 +177,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
 
         helperName.setText(getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.NAME_HELPER, ""));
         mode = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.MODE, UtilStrings.MODE_3);
+        getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putInt(UtilStrings.ROUTE_LIST_SIZE, databaseHelper.routeStationLists().size()).apply();
 
 
         route_name.setSelected(true);
@@ -180,27 +194,67 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         if (mode == UtilStrings.MODE_3) {
             spanCount = 1;
         }
+        routeStationListsForInfinite = databaseHelper.routeStationLists();
+        priceAdapterPrices = new PriceAdapterPrices(routeStationListsForInfinite, this);
 
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, spanCount);
+
+        gridLayoutManager = new GridLayoutManager(this, spanCount);
         priceListView.setLayoutManager(gridLayoutManager);
         priceListView.setHasFixedSize(true);
 
-        priceLists = databaseHelper.priceLists(4);
-        if (priceLists.size() == 0) {
+//        databaseHelper.getWritableDatabase().execSQL("DELETE FROM " + DatabaseHelper.PRICE_TABLE);
+
+        priceLists = databaseHelper.priceLists();
+        /*if (priceLists.size() == 0) {
             priceLists = GeneralUtils.priceCsv(this);
-        }
+        }*/
         if (mode == UtilStrings.MODE_1) {
             priceListView.setAdapter(new PriceAdapter(priceLists, this));
+            mode_selector.setText(getString(R.string.normal_mode));
         } else if (mode == UtilStrings.MODE_2) {
             priceListView.setAdapter(new PriceAdapterPlaces(priceLists, this));
+            mode_selector.setText(getString(R.string.places_mode));
         } else {
-            priceListView.setAdapter(new PriceAdapterPrices(databaseHelper.routeStationLists(), this));
+//            priceListView.setAdapter(new PriceAdapterPrices(databaseHelper.routeStationLists(),TicketAndTracking.this));
+            priceListView.setAdapter(priceAdapterPrices);
+            mode_selector.setText(getString(R.string.price_mode));
         }
+
+        mode_selector.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu popup = new PopupMenu(TicketAndTracking.this, mode_selector);
+                //inflating menu from xml resource
+                popup.inflate(R.menu.mode_select_menu);
+                //adding click listener
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.mode_1:
+                                setMode(UtilStrings.MODE_1, 4, getString(R.string.normal_mode));
+                                return true;
+                            case R.id.mode_2:
+                                setMode(UtilStrings.MODE_2, 4, getString(R.string.places_mode));
+                                return true;
+                            case R.id.mode_3:
+                                setMode(UtilStrings.MODE_3, 1, getString(R.string.price_mode));
+                                return true;
+                        }
+                        return true;
+
+                    }
+                });
+                //displaying the popup
+                popup.show();
+            }
+        });
 
 
         normalDiscountToggle.setOnToggledListener(new OnToggledListener() {
             @Override
             public void onSwitched(LabeledSwitch labeledSwitch, boolean isOn) {
+                mode = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.MODE, UtilStrings.MODE_1);
                 /*totalRemainingTickets.setText(GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.listTickets().size())) + "\n" + GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.remainingAmount())));
                 if (databaseHelper.listTickets().size() > 0) {
                     boolean datasending = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getBoolean(UtilStrings.DATA_SENDING, false);
@@ -213,15 +267,19 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
 
                 if (isOn) {
                     if (mode != UtilStrings.MODE_3) {
-                        setPriceLists(0);
+                        setPriceLists();
                     } else {
-                        priceListView.setAdapter(new PriceAdapterPrices(databaseHelper.routeStationLists(), TicketAndTracking.this));
+//                        priceListView.setAdapter(new PriceAdapterPrices(databaseHelper.routeStationLists(),TicketAndTracking.this));
+                        priceListView.setAdapter(priceAdapterPrices);
+                        priceListView.getLayoutManager().scrollToPosition(listVisiblePosition);
                     }
                 } else {
                     if (mode != UtilStrings.MODE_3) {
-                        setPriceLists(4);
+                        setPriceLists();
                     } else {
-                        priceListView.setAdapter(new PriceAdapterPrices(databaseHelper.routeStationLists(), TicketAndTracking.this));
+                        priceListView.setAdapter(priceAdapterPrices);
+//                        priceListView.setAdapter(new PriceAdapterPrices(databaseHelper.routeStationLists(),TicketAndTracking.this));
+                        priceListView.getLayoutManager().scrollToPosition(listVisiblePosition);
                     }
                 }
 
@@ -278,6 +336,30 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         interValDataPush();
 
 
+        priceListView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+
+                listVisiblePosition = gridLayoutManager.findFirstVisibleItemPosition();
+                if (dy > 0) //check for scroll down
+                {
+                    visibleItemCount = gridLayoutManager.getChildCount();
+                    totalItemCount = gridLayoutManager.getItemCount();
+                    pastVisiblesItems = gridLayoutManager.findFirstVisibleItemPosition();
+
+                    if ((visibleItemCount + pastVisiblesItems) >= totalItemCount) {
+                        mode = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.MODE, UtilStrings.MODE_1);
+                        if (mode == UtilStrings.MODE_3) {
+                            routeStationListsForInfinite.addAll(databaseHelper.routeStationLists());
+                            priceAdapterPrices.notifyDataChange(routeStationListsForInfinite);
+                        }
+                        //Do pagination.. i.e. fetch new data
+                    }
+                }
+            }
+        });
+
+
         BaseApplication.instance.setCurrentCmdType(BaseEnum.CMD_ESC);
         printerFactory = new UniversalPrinterFactory();
         rtPrinter = printerFactory.create();
@@ -289,7 +371,26 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         /*showUSBDeviceChooseDialog();    //use for voting*/
 
 
-        /*showBluetoothDeviceChooseDialog();*/
+        showBluetoothDeviceChooseDialog();
+    }
+
+    private void setMode(int modeType, int spanCount, String modeStr) {
+        getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putInt(UtilStrings.MODE, modeType).apply();
+        gridLayoutManager = new GridLayoutManager(TicketAndTracking.this, spanCount);
+        priceListView.setLayoutManager(gridLayoutManager);
+        mode_selector.setText(modeStr);
+        switch (modeType) {
+            case UtilStrings.MODE_1:
+                priceListView.setAdapter(new PriceAdapter(priceLists, this));
+                break;
+            case UtilStrings.MODE_2:
+                priceListView.setAdapter(new PriceAdapterPlaces(priceLists, this));
+                break;
+            case UtilStrings.MODE_3:
+//                priceListView.setAdapter(new PriceAdapterPrices(databaseHelper.routeStationLists(),TicketAndTracking.this));
+                priceListView.setAdapter(priceAdapterPrices);
+                break;
+        }
     }
 
     private void isToday() {
@@ -394,9 +495,14 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
     }
 
 
-    public void setPriceLists(int min) {
-        priceLists = databaseHelper.priceLists(min);
-        priceListView.setAdapter(new PriceAdapter(priceLists, TicketAndTracking.this));
+    public void setPriceLists() {
+        priceLists = databaseHelper.priceLists();
+        if (mode==UtilStrings.MODE_1){
+
+            priceListView.setAdapter(new PriceAdapter(priceLists, TicketAndTracking.this));
+        }else {
+            priceListView.setAdapter(new PriceAdapterPlaces(priceLists, TicketAndTracking.this));
+        }
         /*saveBitmap(getBitmapFromView(priceListView));*/
         setTotal();
 

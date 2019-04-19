@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/mode_1"
+        android:title="@string/normal_mode"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/mode_2"
+        android:title="@string/places_mode"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/mode_3"
+        android:title="@string/price_mode"
+        app:showAsAction="never" />
+
+
+</menu>

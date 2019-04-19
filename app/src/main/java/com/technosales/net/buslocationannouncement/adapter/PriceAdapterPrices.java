@@ -59,6 +59,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
     private float totalDistance;
     private String currentStationId;
     private String price;
+    private int routeStationListSize;
 
     public PriceAdapterPrices(List<RouteStationList> routeStationLists, Context context) {
         this.routeStationLists = routeStationLists;
@@ -79,6 +80,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
         final RouteStationList routeStationModelList = routeStationLists.get(position);
         preferences = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0);
         routeType = preferences.getInt(UtilStrings.ROUTE_TYPE, UtilStrings.NON_RING_ROAD);
+        routeStationListSize = preferences.getInt(UtilStrings.ROUTE_LIST_SIZE, 0);
         databaseHelper = new DatabaseHelper(context);
 
 
@@ -98,7 +100,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                 totalDistance = 0;
 //                forward = preferences.getBoolean(UtilStrings.FORWARD, true);
                 forward = false;
-                for (int i = 0; i < routeStationLists.size(); i++) {
+                for (int i = 0; i < routeStationListSize; i++) {
                     double startLat = Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"));
                     double startLng = Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0"));
                     double endLat = Double.parseDouble(routeStationLists.get(i).station_lat);
@@ -121,56 +123,63 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                     }
                 }
                 if (routeType == UtilStrings.NON_RING_ROAD) {
-                    price = databaseHelper.priveWrtDistance(Math.abs(currentStationDistance - routeStationModelList.station_distance));
+                    price = databaseHelper.priceWrtDistance(Math.abs(currentStationDistance - routeStationModelList.station_distance), ((TicketAndTracking) context).normalDiscountToggle.isOn());
+
 
                     Log.i("priceWrt", price);
 
                 } else {
-                    totalDistance =0;
+                    totalDistance = 0;
 
                     if (forward) {
-                        if (orderPos < routeStationModelList.station_order) {
-                            for (int k = 0; k < routeStationLists.size(); k++) {
-                                if (routeStationLists.get(k).station_order > orderPos && routeStationLists.get(k).station_order < routeStationModelList.station_order) {
-                                    totalDistance = totalDistance + GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(k - 1).station_lat), Double.parseDouble(routeStationLists.get(k - 1).station_lng), Double.parseDouble(routeStationLists.get(k).station_lat), Double.parseDouble(routeStationLists.get(k).station_lng));
+                        if (orderPos <= routeStationModelList.station_order) {
+                            for (int k = 0; k < routeStationListSize - 1; k++) {
+                                if (routeStationLists.get(k).station_order >= orderPos && routeStationLists.get(k).station_order <= routeStationModelList.station_order) {
+                                    if (routeStationLists.get(k).station_order == routeStationModelList.station_order) {
+                                        break;
+                                    } else {
+                                        totalDistance = totalDistance + GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(k + 1).station_lat), Double.parseDouble(routeStationLists.get(k + 1).station_lng), Double.parseDouble(routeStationLists.get(k).station_lat), Double.parseDouble(routeStationLists.get(k).station_lng));
+
+                                    }
                                 }
                             }
 
-                        } else if (orderPos > routeStationModelList.station_order) {
-                            for (int i = 0; i < routeStationLists.size(); i++) {
-                                if (routeStationLists.get(i).station_order > orderPos) {
-                                    totalDistance = totalDistance+GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(i - 1).station_lat), Double.parseDouble(routeStationLists.get(i - 1).station_lng), Double.parseDouble(routeStationLists.get(i).station_lat), Double.parseDouble(routeStationLists.get(i).station_lng));
-                                    if (i == routeStationLists.size() - 1) {
+                        } else /*if (orderPos >= routeStationModelList.station_order)*/ {
+                            for (int i = 0; i < routeStationListSize; i++) {
+                                if (routeStationLists.get(i).station_order >= orderPos) {
+                                    totalDistance = totalDistance + GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(i - 1).station_lat), Double.parseDouble(routeStationLists.get(i - 1).station_lng), Double.parseDouble(routeStationLists.get(i).station_lat), Double.parseDouble(routeStationLists.get(i).station_lng));
+                                    if (i == routeStationListSize - 1) {
                                         for (int j = 1; j < routeStationModelList.station_order - 1; j++) {
-                                            totalDistance = totalDistance+GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(j - 1).station_lat), Double.parseDouble(routeStationLists.get(j - 1).station_lng), Double.parseDouble(routeStationLists.get(j).station_lat), Double.parseDouble(routeStationLists.get(j).station_lng));
+                                            totalDistance = totalDistance + GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(j - 1).station_lat), Double.parseDouble(routeStationLists.get(j - 1).station_lng), Double.parseDouble(routeStationLists.get(j).station_lat), Double.parseDouble(routeStationLists.get(j).station_lng));
                                         }
                                     }
                                 }
                             }
                         }
-                    }else {
-                        if (orderPos > routeStationModelList.station_order) {
-                            for (int k = routeStationLists.size()-1; k >-1; k--) {
-                                if (routeStationLists.get(k).station_order < orderPos && routeStationLists.get(k).station_order > routeStationModelList.station_order) {
+                    } else {
+                        Log.i("totalDistance", orderPos + "::" + routeStationModelList.station_order);
+                        if (orderPos >= routeStationModelList.station_order) {
+                            for (int k = orderPos - 2; k > -1; k--) {
+                                if (routeStationLists.get(k).station_order <= orderPos && routeStationLists.get(k).station_order >= routeStationModelList.station_order) {
                                     totalDistance = totalDistance + GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(k + 1).station_lat), Double.parseDouble(routeStationLists.get(k + 1).station_lng), Double.parseDouble(routeStationLists.get(k).station_lat), Double.parseDouble(routeStationLists.get(k).station_lng));
                                 }
                             }
 
-                        } else if (orderPos < routeStationModelList.station_order) {
-                            for (int i = routeStationLists.size()-1; i >-1; i--) {
-                                if (routeStationLists.get(i).station_order < orderPos) {
-                                    totalDistance = totalDistance+GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(i + 1).station_lat), Double.parseDouble(routeStationLists.get(i + 1).station_lng), Double.parseDouble(routeStationLists.get(i).station_lat), Double.parseDouble(routeStationLists.get(i).station_lng));
-                                    if (i == 0) {
-                                        for (int j =routeStationLists.size()-2 ; j > routeStationModelList.station_order+1; j--) {
-                                            totalDistance = totalDistance+GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(j + 1).station_lat), Double.parseDouble(routeStationLists.get(j + 1).station_lng), Double.parseDouble(routeStationLists.get(j).station_lat), Double.parseDouble(routeStationLists.get(j).station_lng));
-                                        }
+                        } else /*if (orderPos <= routeStationModelList.station_order)*/ {
+                            for (int i = orderPos - 2; i > -1; i--) {
+                                totalDistance = totalDistance + GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(i + 1).station_lat), Double.parseDouble(routeStationLists.get(i + 1).station_lng), Double.parseDouble(routeStationLists.get(i).station_lat), Double.parseDouble(routeStationLists.get(i).station_lng));
+                                if (i == 0) {
+                                    Log.i("totalDistance", "0");
+                                    for (int j = routeStationListSize - 2; j > routeStationModelList.station_order - 2; j--) {
+                                        totalDistance = totalDistance + GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(j + 1).station_lat), Double.parseDouble(routeStationLists.get(j + 1).station_lng), Double.parseDouble(routeStationLists.get(j).station_lat), Double.parseDouble(routeStationLists.get(j).station_lng));
                                     }
                                 }
+
                             }
                         }
                     }
+                    price = databaseHelper.priceWrtDistance(totalDistance, ((TicketAndTracking) context).normalDiscountToggle.isOn());
 
-                    price = databaseHelper.priveWrtDistance(totalDistance);
                     Log.i("totalDistance", "" + totalDistance);
                 }
                 AlertDialog alertDialog = new AlertDialog.Builder(context).create();
@@ -258,13 +267,13 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                                                                                    }*/
 
                             //imageprint
-                            /*((TicketAndTracking) context).mBitmap = drawText(busName + "\n" +
+                            ((TicketAndTracking) context).mBitmap = drawText(busName + "\n" +
                                     GeneralUtils.getUnicodeNumber(ticketInfoList.ticketNumber) + "\n" +
                                     "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.ticketPrice) + discountType + "\n" +
-                                    nearestName + "-" + routeStationList.station_name + "\n" +
+                                    nearestName + "-" + routeStationModelList.station_name + "\n" +
                                     GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
-                                    GeneralUtils.getUnicodeNumber(GeneralUtils.getTime()), 380);*/
+                                    GeneralUtils.getUnicodeNumber(GeneralUtils.getTime()), 380);
                         } else {
                             ((TicketAndTracking) context).helperName.setText("सहायक छान्नुहोस् ।");
                         }
@@ -288,6 +297,11 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
     @Override
     public int getItemCount() {
         return routeStationLists.size();
+    }
+
+    public void notifyDataChange(List<RouteStationList> routeStationLists) {
+        this.routeStationLists = routeStationLists;
+        notifyDataSetChanged();
     }
 
     @Override

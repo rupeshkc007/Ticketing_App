@@ -10,6 +10,7 @@ import android.widget.Button;
 
 import com.technosales.net.buslocationannouncement.R;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
+import com.technosales.net.buslocationannouncement.network.GetPricesFares;
 import com.technosales.net.buslocationannouncement.network.RegisterDevice;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
@@ -28,6 +29,8 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
         viewIniialize();
 
+
+
         databaseHelper = new DatabaseHelper(this);
         sharedPreferences = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0);
 
@@ -35,8 +38,8 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
            /* if (GeneralUtils.isNetworkAvailable(this)) {
                 reg_device_number.setText(sharedPreferences.getString(UtilStrings.DEVICE_ID, ""));
             } else {*/
-                startActivity(new Intent(this, TicketAndTracking.class));
-                finish();
+            startActivity(new Intent(this, TicketAndTracking.class));
+            finish();
 //            }
         }
 
@@ -48,7 +51,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         btn_reg = findViewById(R.id.btn_reg);
         btn_reg.setOnClickListener(this);
 
-        reg_device_number.setText("8170613861");
+//        reg_device_number.setText("8170613861");
     }
 
     @Override
@@ -57,7 +60,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             case R.id.btn_reg:
 
                 if (reg_device_number.getText().toString().trim().length() > 0) {
-                    RegisterDevice.RegisterDevice(this, reg_device_number.getText().toString().trim());
+                        new GetPricesFares(this).getFares(reg_device_number.getText().toString().trim());
                     sharedPreferences.edit().putString(UtilStrings.DEVICE_ID, reg_device_number.getText().toString().trim()).apply();
                 } else {
                     reg_device_number.setError("Enter Device Number");

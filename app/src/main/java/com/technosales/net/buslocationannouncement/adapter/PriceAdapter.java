@@ -90,14 +90,17 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
 
         final PriceList priceList = priceLists.get(position);
 
-        holder.price_value.setText(priceList.price_value);
 
         if (((TicketAndTracking) context).normalDiscountToggle.isOn()) {
             holder.price_value.setTextColor(context.getResources().getColorStateList(R.color.discount_txt_color));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 holder.price_value.setBackground(ContextCompat.getDrawable(context, R.drawable.discount_price_bg));
             }
+            holder.price_value.setText(priceList.price_discount_value);
+            priceList.price_value =priceList.price_discount_value;
         } else {
+            holder.price_value.setText(priceList.price_value);
+
         }
        /* holder.price_value.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -219,13 +222,13 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
                                                                                    }*/
 
                                     //imageprint
-                                    /* ((TicketAndTracking) context).mBitmap = drawText(busName + "\n" +
+                                     ((TicketAndTracking) context).mBitmap = drawText(busName + "\n" +
                                              GeneralUtils.getUnicodeNumber(ticketInfoList.ticketNumber) + "\n" +
                                              "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.ticketPrice) + discountType + "\n" +
                                              nearest_name + "\n" +
                                              GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                                              + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
-                                             GeneralUtils.getUnicodeNumber(GeneralUtils.getTime()), 380);*/
+                                             GeneralUtils.getUnicodeNumber(GeneralUtils.getTime()), 380);
                                 } else {
                                     ((TicketAndTracking) context).helperName.setText("सहायक छान्नुहोस् ।");
                                 }
