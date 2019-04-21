@@ -51,7 +51,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         btn_reg = findViewById(R.id.btn_reg);
         btn_reg.setOnClickListener(this);
 
-//        reg_device_number.setText("8170613861");
+        reg_device_number.setText("8170613861");
     }
 
     @Override

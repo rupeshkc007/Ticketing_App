@@ -98,8 +98,8 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
             public void onClick(View v) {
                 float distance, nearest = 0;
                 totalDistance = 0;
-//                forward = preferences.getBoolean(UtilStrings.FORWARD, true);
-                forward = false;
+                forward = preferences.getBoolean(UtilStrings.FORWARD, true);
+//                forward = false;
                 for (int i = 0; i < routeStationListSize; i++) {
                     double startLat = Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"));
                     double startLng = Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0"));
@@ -146,10 +146,10 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
 
                         } else /*if (orderPos >= routeStationModelList.station_order)*/ {
                             for (int i = 0; i < routeStationListSize; i++) {
-                                if (routeStationLists.get(i).station_order >= orderPos) {
+                                if (routeStationLists.get(i).station_order > orderPos) {
                                     totalDistance = totalDistance + GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(i - 1).station_lat), Double.parseDouble(routeStationLists.get(i - 1).station_lng), Double.parseDouble(routeStationLists.get(i).station_lat), Double.parseDouble(routeStationLists.get(i).station_lng));
                                     if (i == routeStationListSize - 1) {
-                                        for (int j = 1; j < routeStationModelList.station_order - 1; j++) {
+                                        for (int j = 1; j < routeStationModelList.station_order; j++) {
                                             totalDistance = totalDistance + GeneralUtils.calculateDistance(Double.parseDouble(routeStationLists.get(j - 1).station_lat), Double.parseDouble(routeStationLists.get(j - 1).station_lng), Double.parseDouble(routeStationLists.get(j).station_lat), Double.parseDouble(routeStationLists.get(j).station_lng));
                                         }
                                     }
@@ -180,7 +180,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                     }
                     price = databaseHelper.priceWrtDistance(totalDistance, ((TicketAndTracking) context).normalDiscountToggle.isOn());
 
-                    Log.i("totalDistance", "" + totalDistance);
+                    Log.i("totalDistance", "" + totalDistance/1000);
                 }
                 AlertDialog alertDialog = new AlertDialog.Builder(context).create();
 

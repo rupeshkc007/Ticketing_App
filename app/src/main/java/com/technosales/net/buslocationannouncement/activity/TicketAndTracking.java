@@ -254,7 +254,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         normalDiscountToggle.setOnToggledListener(new OnToggledListener() {
             @Override
             public void onSwitched(LabeledSwitch labeledSwitch, boolean isOn) {
-                mode = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.MODE, UtilStrings.MODE_1);
+                mode = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.MODE, UtilStrings.MODE_3);
                 /*totalRemainingTickets.setText(GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.listTickets().size())) + "\n" + GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.remainingAmount())));
                 if (databaseHelper.listTickets().size() > 0) {
                     boolean datasending = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getBoolean(UtilStrings.DATA_SENDING, false);
@@ -347,8 +347,8 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
                     totalItemCount = gridLayoutManager.getItemCount();
                     pastVisiblesItems = gridLayoutManager.findFirstVisibleItemPosition();
 
-                    if ((visibleItemCount + pastVisiblesItems) >= totalItemCount) {
-                        mode = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.MODE, UtilStrings.MODE_1);
+                    if ((visibleItemCount + pastVisiblesItems) >= totalItemCount - 9) {
+                        mode = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.MODE, UtilStrings.MODE_3);
                         if (mode == UtilStrings.MODE_3) {
                             routeStationListsForInfinite.addAll(databaseHelper.routeStationLists());
                             priceAdapterPrices.notifyDataChange(routeStationListsForInfinite);
@@ -497,10 +497,10 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
 
     public void setPriceLists() {
         priceLists = databaseHelper.priceLists();
-        if (mode==UtilStrings.MODE_1){
+        if (mode == UtilStrings.MODE_1) {
 
             priceListView.setAdapter(new PriceAdapter(priceLists, TicketAndTracking.this));
-        }else {
+        } else {
             priceListView.setAdapter(new PriceAdapterPlaces(priceLists, TicketAndTracking.this));
         }
         /*saveBitmap(getBitmapFromView(priceListView));*/
@@ -776,7 +776,6 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
 
 
                 }*/
-
                 rHandler.postAtTime(rTicker, next);
             }
         }
