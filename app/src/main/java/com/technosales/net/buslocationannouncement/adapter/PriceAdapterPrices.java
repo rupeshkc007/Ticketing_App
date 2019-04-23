@@ -89,6 +89,20 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 holder.routeStationItem.setBackground(ContextCompat.getDrawable(context, R.drawable.discount_price_bg));
             }
+
+            if (routeStationModelList.station_id.equals(preferences.getString(UtilStrings.CURRENT_ID,""))){
+                holder.routeStationItem.setTextColor(context.getResources().getColorStateList(R.color.discount_txt_color));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    holder.routeStationItem.setBackground(ContextCompat.getDrawable(context, R.drawable.discount_cr_station));
+                }
+            }
+        }else {
+            if (routeStationModelList.station_id.equals(preferences.getString(UtilStrings.CURRENT_ID,""))){
+                holder.routeStationItem.setTextColor(context.getResources().getColorStateList(R.color.text_color));
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    holder.routeStationItem.setBackground(ContextCompat.getDrawable(context, R.drawable.normal_cr_station));
+                }
+            }
         }
 
         holder.routeStationItem.setText(routeStationModelList.station_name);
@@ -223,7 +237,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                             if (total_tickets < 10) {
                                 valueOfTickets = "00" + String.valueOf(total_tickets);
 
-                            } else if (total_tickets > 9 && total_tickets < 100) {
+                            } else if (total_tickets < 100) {
                                 valueOfTickets = "0" + String.valueOf(total_tickets);
                             } else {
                                 valueOfTickets = String.valueOf(total_tickets);

@@ -25,6 +25,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearSmoothScroller;
+import android.support.v7.widget.LinearSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -193,6 +195,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
 
         if (mode == UtilStrings.MODE_3) {
             spanCount = 1;
+            new LinearSnapHelper().attachToRecyclerView(priceListView);
         }
         routeStationListsForInfinite = databaseHelper.routeStationLists();
         priceAdapterPrices = new PriceAdapterPrices(routeStationListsForInfinite, this);
@@ -295,8 +298,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
             public void onClick(View v) {
 
                 AlertDialog alertDialog = new AlertDialog.Builder(TicketAndTracking.this).create();
-                alertDialog.setTitle("CONFIRM");
-                alertDialog.setMessage("Clear Data");
+                alertDialog.setTitle("Clear Data");
                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
@@ -335,10 +337,10 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         setTotal();
         interValDataPush();
 
-
         priceListView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+
 
                 listVisiblePosition = gridLayoutManager.findFirstVisibleItemPosition();
                 if (dy > 0) //check for scroll down
@@ -371,7 +373,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         /*showUSBDeviceChooseDialog();    //use for voting*/
 
 
-        showBluetoothDeviceChooseDialog();
+//        showBluetoothDeviceChooseDialog();
     }
 
     private void setMode(int modeType, int spanCount, String modeStr) {
@@ -776,6 +778,26 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
 
 
                 }*/
+
+                float distance, nearest = 0;
+
+                for (int i = 0; i < databaseHelper.routeStationLists().size(); i++) {
+                    double startLat = Double.parseDouble(getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.LATITUDE, "0.0"));
+                    double startLng = Double.parseDouble(getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.LONGITUDE, "0.0"));
+                    double endLat = Double.parseDouble(databaseHelper.routeStationLists().get(i).station_lat);
+                    double endLng = Double.parseDouble(databaseHelper.routeStationLists().get(i).station_lng);
+                    distance = GeneralUtils.calculateDistance(startLat, startLng, endLat, endLng);
+                    if (i == 0) {
+                        nearest = distance;
+                    } else {
+                        if (distance < nearest) {
+                            nearest = distance;
+                            getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.CURRENT_ID, databaseHelper.routeStationLists().get(i).station_id).apply();
+
+                        }
+
+                    }
+                }
                 rHandler.postAtTime(rTicker, next);
             }
         }

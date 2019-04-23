@@ -78,8 +78,7 @@ public class RouteStation {
                         }
                         progressDialog.dismiss();
                         context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.ROUTE_ID, routeId).apply();
-                        /*context.startActivity(new Intent(context, AnnounceActivity.class));*/
-                        context.startActivity(new Intent(context, TicketAndTracking.class));
+                                                context.startActivity(new Intent(context, TicketAndTracking.class));
                     } else {
                         getRouteStation(context, routeId, progressDialog);
                     }
