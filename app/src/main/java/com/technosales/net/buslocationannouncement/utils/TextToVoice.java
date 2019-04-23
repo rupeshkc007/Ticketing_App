@@ -14,8 +14,8 @@ public class TextToVoice {
 
     public TextToVoice(Context context) {
         this.context = context;
-        try {
 
+        try {
             initTTs();
         } catch (Exception ex) {
 
@@ -41,5 +41,8 @@ public class TextToVoice {
         Log.i("speakVoice", "" + speakVoice);
     }
 
-
+    public void speak(String current) {
+        textToSpeech.speak(current, TextToSpeech.QUEUE_FLUSH, null);
+        Log.i("speakVoice", "" + current);
+    }
 }

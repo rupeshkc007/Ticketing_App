@@ -9,6 +9,7 @@ import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
+import com.technosales.net.buslocationannouncement.utils.TextToVoice;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
 
 import org.json.JSONArray;
@@ -28,7 +29,7 @@ public class GetPricesFares {
             public void callback(String url, JSONArray object, AjaxStatus status) {
                 super.callback(url, object, status);
                 if (object != null) {
-                    Log.i("jsdfsdgfjsdf","hgjfgshdf"+object);
+                    Log.i("jsdfsdgfjsdf", "hgjfgshdf" + object);
                     DatabaseHelper databaseHelper = new DatabaseHelper(context);
 
                     databaseHelper.getWritableDatabase().execSQL("DELETE FROM " + DatabaseHelper.PRICE_TABLE);
@@ -45,8 +46,9 @@ public class GetPricesFares {
                         contentValues.put(DatabaseHelper.PRICE_MIN_DISTANCE, min_distance);
                         contentValues.put(DatabaseHelper.PRICE_DISTANCE, distance_up_to);
                         databaseHelper.insertPrice(contentValues);
+
                     }
-                    RegisterDevice.RegisterDevice(context,number );
+                    RegisterDevice.RegisterDevice(context, number);
 
                 }
             }

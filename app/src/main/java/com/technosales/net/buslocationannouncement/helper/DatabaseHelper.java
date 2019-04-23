@@ -49,7 +49,7 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    public static final int DATABASE_VERSION = 3;
+    public static final int DATABASE_VERSION = 5;
     public static final String DATABASE_NAME = "traccar.db";
 
     public static final String ROUTE_STATION_TABLE = "route_station";
@@ -82,6 +82,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String HELPER_TABLE = "helper_table";
     public static final String HELPER_ID = "helper_id";
     public static final String HELPER_NAME = "helper_name";
+
+
+    public static final String ADVERTISEMENT_TABLE = "ad_table";
+    public static final String ADVERTISEMENT_ID = "ad_id";
+    public static final String ADVERTISEMENT_STATIONS = "ad_stations";
+    public static final String ADVERTISEMENT_FILE = "ad_file";
+    public static final String ADVERTISEMENT_COUNT = "ad_count";
     private final Context context;
 
 
@@ -187,25 +194,36 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 HELPER_ID + " TEXT," +
                 HELPER_NAME + " TEXT)");
 
+        db.execSQL("CREATE TABLE " + ADVERTISEMENT_TABLE + "(" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                ADVERTISEMENT_ID + " TEXT," +
+                ADVERTISEMENT_STATIONS + " TEXT," +
+                ADVERTISEMENT_FILE + " TEXT," +
+                ADVERTISEMENT_COUNT + " INTEGER)");
+
 
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS position;");
-        db.execSQL("DROP TABLE IF EXISTS ticket_table;");
-        db.execSQL("DROP TABLE IF EXISTS price_table;");
-        db.execSQL("DROP TABLE IF EXISTS route_station;");
-        db.execSQL("DROP TABLE IF EXISTS ticket_table_txt;");
-        onCreate(db);
+        dropAndCreate(db);
+
     }
 
+
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        dropAndCreate(db);
+
+    }
+
+    private void dropAndCreate(SQLiteDatabase db) {
         db.execSQL("DROP TABLE IF EXISTS position;");
-        db.execSQL("DROP TABLE IF EXISTS ticket_table;");
-        db.execSQL("DROP TABLE IF EXISTS price_table;");
-        db.execSQL("DROP TABLE IF EXISTS route_station;");
-        db.execSQL("DROP TABLE IF EXISTS ticket_table_txt;");
+        db.execSQL("DROP TABLE IF EXISTS " + TICKET_TABLE + ";");
+        db.execSQL("DROP TABLE IF EXISTS " + PRICE_TABLE + ";");
+        db.execSQL("DROP TABLE IF EXISTS " + HELPER_TABLE + ";");
+        db.execSQL("DROP TABLE IF EXISTS " + ROUTE_STATION_TABLE + ";");
+        db.execSQL("DROP TABLE IF EXISTS " + TICKET_TABLE_TXT + ";");
+        db.execSQL("DROP TABLE IF EXISTS " + ADVERTISEMENT_TABLE + ";");
         onCreate(db);
     }
 
@@ -251,6 +269,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
         Log.i("getValue", "" + contentValues.toString());
         sqLiteDatabase.insert(PRICE_TABLE, null, contentValues);
+    }
+
+    public void insertAdv(ContentValues contentValues) {
+        getWritableDatabase().insert(ADVERTISEMENT_TABLE, null, contentValues);
+        Log.i("insertAd", "" + contentValues.toString());
     }
 
     public void insertTicketInfo(TicketInfoList ticketInfoList) {
@@ -472,14 +495,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     }
 
-    public String priceWrtDistance(float distance,boolean isOn) {
+    public String priceWrtDistance(float distance, boolean isOn) {
         String price = "";
         Cursor c = getWritableDatabase().rawQuery("SELECT * FROM " + PRICE_TABLE + " WHERE " + PRICE_MIN_DISTANCE + " <= " + distance + " AND " + PRICE_DISTANCE + " >= " + distance, null);
         while (c.moveToNext()) {
-            if (isOn){
+            if (isOn) {
 
                 price = c.getString(c.getColumnIndex(PRICE_DISCOUNT_VALUE));
-            }else {
+            } else {
                 price = c.getString(c.getColumnIndex(PRICE_VALUE));
             }
         }

@@ -30,6 +30,7 @@ import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.pojo.TicketInfoList;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
+import com.technosales.net.buslocationannouncement.utils.TextToVoice;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
 
 import java.util.List;
@@ -60,10 +61,12 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
     private String currentStationId;
     private String price;
     private int routeStationListSize;
+    private TextToVoice textToVoice;
 
-    public PriceAdapterPrices(List<RouteStationList> routeStationLists, Context context) {
+    public PriceAdapterPrices(List<RouteStationList> routeStationLists, Context context,TextToVoice textToVoice) {
         this.routeStationLists = routeStationLists;
         this.context = context;
+        this.textToVoice = textToVoice;
     }
 
 
@@ -90,14 +93,14 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                 holder.routeStationItem.setBackground(ContextCompat.getDrawable(context, R.drawable.discount_price_bg));
             }
 
-            if (routeStationModelList.station_id.equals(preferences.getString(UtilStrings.CURRENT_ID,""))){
+            if (routeStationModelList.station_id.equals(preferences.getString(UtilStrings.CURRENT_ID, ""))) {
                 holder.routeStationItem.setTextColor(context.getResources().getColorStateList(R.color.discount_txt_color));
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                     holder.routeStationItem.setBackground(ContextCompat.getDrawable(context, R.drawable.discount_cr_station));
                 }
             }
-        }else {
-            if (routeStationModelList.station_id.equals(preferences.getString(UtilStrings.CURRENT_ID,""))){
+        } else {
+            if (routeStationModelList.station_id.equals(preferences.getString(UtilStrings.CURRENT_ID, ""))) {
                 holder.routeStationItem.setTextColor(context.getResources().getColorStateList(R.color.text_color));
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                     holder.routeStationItem.setBackground(ContextCompat.getDrawable(context, R.drawable.normal_cr_station));
@@ -110,6 +113,8 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
         holder.routeStationItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+//                textToVoice.speak(routeStationModelList.station_name);
                 float distance, nearest = 0;
                 totalDistance = 0;
                 forward = preferences.getBoolean(UtilStrings.FORWARD, true);
@@ -194,7 +199,7 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                     }
                     price = databaseHelper.priceWrtDistance(totalDistance, ((TicketAndTracking) context).normalDiscountToggle.isOn());
 
-                    Log.i("totalDistance", "" + totalDistance/1000);
+                    Log.i("totalDistance", "" + totalDistance / 1000);
                 }
                 AlertDialog alertDialog = new AlertDialog.Builder(context).create();
 

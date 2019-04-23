@@ -17,9 +17,11 @@ package com.technosales.net.buslocationannouncement.trackcar;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -70,8 +72,9 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
         }
     }
 
-    public TrackingController(Context context) {
+    public TrackingController(Context context,TextToVoice textToSpeech) {
         this.context = context;
+        this.textToVoice = textToSpeech;
         handler = new Handler();
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
         taxiPreferences = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0);
@@ -79,7 +82,6 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
 
         positionProvider = new PositionProvider(context, this);
         databaseHelper = new DatabaseHelper(context);
-        textToVoice = new TextToVoice(context);
         networkManager = new NetworkManager(context, this);
         isOnline = networkManager.isOnline();
 
@@ -89,6 +91,7 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
 
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
+
     }
 
     public void start() {
@@ -169,7 +172,6 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
                         }
                         preOrder = currentOrder;
                         preOrderId = currentOrderId;
-
                         textToVoice.speakStation(routeStationList.station_name, nextStation);
                     }
                     break;

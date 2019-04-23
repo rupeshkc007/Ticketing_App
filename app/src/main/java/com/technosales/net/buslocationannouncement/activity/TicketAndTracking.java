@@ -15,8 +15,11 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
@@ -75,6 +78,7 @@ import com.technosales.net.buslocationannouncement.adapter.PriceAdapter;
 import com.technosales.net.buslocationannouncement.adapter.PriceAdapterPlaces;
 import com.technosales.net.buslocationannouncement.adapter.PriceAdapterPrices;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
+import com.technosales.net.buslocationannouncement.network.GetAdvertisements;
 import com.technosales.net.buslocationannouncement.network.TicketInfoDataPush;
 import com.technosales.net.buslocationannouncement.pojo.HelperList;
 import com.technosales.net.buslocationannouncement.pojo.PriceList;
@@ -88,6 +92,7 @@ import com.technosales.net.buslocationannouncement.trackcar.AutostartReceiver;
 import com.technosales.net.buslocationannouncement.trackcar.TrackingController;
 import com.technosales.net.buslocationannouncement.trackcar.TrackingService;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
+import com.technosales.net.buslocationannouncement.utils.TextToVoice;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
 
 import java.io.File;
@@ -160,7 +165,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         trackCarPrefs.edit().putString(KEY_ACCURACY, "high").apply();
         /*trackCarPrefs.edit().putString(KEY_DEVICE, "12345678").apply();*/
         databaseHelper = new DatabaseHelper(this);
-        new TrackingController(this);
+        new TrackingController(this,new TextToVoice(this));
         startTrackingService(true, false);
 
         /**/
@@ -198,7 +203,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
             new LinearSnapHelper().attachToRecyclerView(priceListView);
         }
         routeStationListsForInfinite = databaseHelper.routeStationLists();
-        priceAdapterPrices = new PriceAdapterPrices(routeStationListsForInfinite, this);
+        priceAdapterPrices = new PriceAdapterPrices(routeStationListsForInfinite, this,new TextToVoice(this));
 
 
         gridLayoutManager = new GridLayoutManager(this, spanCount);
@@ -374,6 +379,10 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
 
 
 //        showBluetoothDeviceChooseDialog();
+
+
+        new GetAdvertisements(this).getAdv();
+
     }
 
     private void setMode(int modeType, int spanCount, String modeStr) {
@@ -806,6 +815,5 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         rTicker.run();
 
     }
-
 
 }
