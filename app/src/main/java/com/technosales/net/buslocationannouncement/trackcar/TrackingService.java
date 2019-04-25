@@ -118,7 +118,7 @@ public class TrackingService extends Service {
 
 
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            trackingController = new TrackingController(this,null);
+            trackingController = new TrackingController(this);
             trackingController.start();
         }
         startForeground(NOTIFICATION_ID, createNotification(this));

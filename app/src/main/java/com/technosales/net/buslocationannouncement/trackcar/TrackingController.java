@@ -18,6 +18,7 @@ package com.technosales.net.buslocationannouncement.trackcar;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
@@ -26,14 +27,18 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.technosales.net.buslocationannouncement.R;
+import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
+import com.technosales.net.buslocationannouncement.pojo.AdvertiseList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
 import com.technosales.net.buslocationannouncement.utils.TextToVoice;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class TrackingController implements PositionProvider.PositionListener, NetworkManager.NetworkHandler {
 
@@ -57,10 +62,13 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
 
     private PowerManager.WakeLock wakeLock;
     private List<RouteStationList> routeStationLists = new ArrayList<>();
-    private TextToVoice textToVoice;
+    private TextToSpeech textToSpeech;
     private int preOrder = 0;
     private String preOrderId = "";
     private String nextStation;
+    private MediaPlayer mediaPlayer;
+    private int length = 0;
+    private boolean isPaused;
 
     private void lock() {
         wakeLock.acquire(WAKE_LOCK_TIMEOUT);
@@ -72,13 +80,20 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
         }
     }
 
-    public TrackingController(Context context,TextToVoice textToSpeech) {
+    public TrackingController(Context context) {
         this.context = context;
-        this.textToVoice = textToSpeech;
         handler = new Handler();
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
         taxiPreferences = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0);
-
+        textToSpeech = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status != TextToSpeech.ERROR) {
+                    textToSpeech.setLanguage(new Locale("nep"));
+                }
+            }
+        });
+        textToSpeech.setPitch(1.1f);
 
         positionProvider = new PositionProvider(context, this);
         databaseHelper = new DatabaseHelper(context);
@@ -122,7 +137,7 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
         if (position != null) {
             write(position);
 
-            Toast.makeText(context, "", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(context, "", Toast.LENGTH_SHORT).show();
             context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LATITUDE, String.valueOf(position.getLatitude())).apply();
             context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.LONGITUDE, String.valueOf(position.getLongitude())).apply();
 
@@ -172,7 +187,10 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
                         }
                         preOrder = currentOrder;
                         preOrderId = currentOrderId;
-                        textToVoice.speakStation(routeStationList.station_name, nextStation);
+
+                        speakStation(routeStationList.station_name, nextStation, currentOrderId);
+
+
                     }
                     break;
                 }
@@ -296,6 +314,80 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
                 }
             }
         }, RETRY_DELAY);
+    }
+
+    private void speakStation(String current, String next, String stationId) {
+        final ArrayList<AdvertiseList> adList = databaseHelper.adFilename(stationId);
+        if (adList.size() == 0) {
+            try {
+                if (mediaPlayer.isPlaying()) {
+                    isPaused = true;
+                    mediaPlayer.pause();
+                    length = mediaPlayer.getCurrentPosition();
+                } else {
+                    isPaused = false;
+                    try {
+                            mediaPlayer.stop();
+                            mediaPlayer.release();
+                            mediaPlayer = null;
+
+                    } catch (Exception ex) {
+                        Log.e("PlayerEx", "" + ex.toString());
+                    }
+                }
+            } catch (Exception ex) {
+
+            }
+
+        }
+        String speakVoice = context.getString(R.string.hamiahile) + current + ", " + context.getString(R.string.aaipugeu) + next + ", " + context.getString(R.string.pugnechau);
+        textToSpeech.speak(speakVoice, TextToSpeech.QUEUE_FLUSH, null);
+        Log.i("speakVoice", "" + speakVoice);
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (adList.size() > 0) {
+                    mediaPlayer = MediaPlayer.create(context, Uri.fromFile(adList.get(0).adFile));
+                    mediaPlayer.start();
+                    mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        @Override
+                        public void onCompletion(MediaPlayer mp) {
+                            databaseHelper.updateAdCount(adList.get(0).adId);
+                            if (adList.size() > 1) {
+                                mediaPlayer = mp;
+                                mediaPlayer = MediaPlayer.create(context, Uri.fromFile(adList.get(1).adFile));
+                                mediaPlayer.start();
+                                mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                    @Override
+                                    public void onCompletion(MediaPlayer mp) {
+                                        if (adList.size() > 2) {
+                                            databaseHelper.updateAdCount(adList.get(1).adId);
+                                            mediaPlayer = mp;
+                                            mediaPlayer = MediaPlayer.create(context, Uri.fromFile(adList.get(2).adFile));
+                                            mediaPlayer.start();
+                                            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                                @Override
+                                                public void onCompletion(MediaPlayer mp) {
+                                                    databaseHelper.updateAdCount(adList.get(2).adId);
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    if (isPaused) {
+                        mediaPlayer.seekTo(length);
+                        mediaPlayer.start();
+                    }
+
+                }
+            }
+        }, 5000);
+
     }
 
 }

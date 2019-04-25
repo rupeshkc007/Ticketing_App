@@ -19,16 +19,15 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.LinearSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -36,28 +35,20 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
-import android.widget.ImageView;
 import android.widget.PopupMenu;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.github.angads25.toggle.LabeledSwitch;
 import com.github.angads25.toggle.interfaces.OnToggledListener;
 import com.rt.printerlibrary.bean.BluetoothEdrConfigBean;
-import com.rt.printerlibrary.bean.LableSizeBean;
-import com.rt.printerlibrary.bean.Position;
 import com.rt.printerlibrary.bean.UsbConfigBean;
 import com.rt.printerlibrary.cmd.Cmd;
 import com.rt.printerlibrary.cmd.EscFactory;
-import com.rt.printerlibrary.cmd.TscFactory;
 import com.rt.printerlibrary.connect.PrinterInterface;
 import com.rt.printerlibrary.enumerate.BmpPrintMode;
 import com.rt.printerlibrary.enumerate.CommonEnum;
 import com.rt.printerlibrary.enumerate.ESCFontTypeEnum;
-import com.rt.printerlibrary.enumerate.PrintDirection;
 import com.rt.printerlibrary.enumerate.SettingEnum;
 import com.rt.printerlibrary.exception.SdkException;
 import com.rt.printerlibrary.factory.cmd.CmdFactory;
@@ -85,14 +76,12 @@ import com.technosales.net.buslocationannouncement.pojo.PriceList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.printer.BluetoothDeviceChooseDialog;
 import com.technosales.net.buslocationannouncement.printer.UsbDeviceChooseDialog;
-import com.technosales.net.buslocationannouncement.printer.apps.BaseActivity;
 import com.technosales.net.buslocationannouncement.printer.apps.BaseApplication;
 import com.technosales.net.buslocationannouncement.printer.utils.BaseEnum;
 import com.technosales.net.buslocationannouncement.trackcar.AutostartReceiver;
 import com.technosales.net.buslocationannouncement.trackcar.TrackingController;
 import com.technosales.net.buslocationannouncement.trackcar.TrackingService;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
-import com.technosales.net.buslocationannouncement.utils.TextToVoice;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
 
 import java.io.File;
@@ -102,15 +91,19 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
 
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_ACCURACY;
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_DEVICE;
+import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_DISTANCE;
+import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_INTERVAL;
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_URL;
 
 public class TicketAndTracking extends AppCompatActivity implements PrinterObserver {
 
     private static final int PERMISSIONS_REQUEST_LOCATION = 2;
     private static final int ALARM_MANAGER_INTERVAL = 15000;
+    private static final int STORAGE_PERMISSION_CODE = 111;
 
     private AlarmManager alarmManager;
     private PendingIntent alarmIntent;
@@ -149,6 +142,11 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
     private List<RouteStationList> routeStationListsForInfinite;
     int listVisiblePosition;
 
+
+    MediaPlayer mediaPlayer;
+    int length = 0;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -163,9 +161,11 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         trackCarPrefs.edit().putString(KEY_URL, getResources().getString(R.string.settings_url_default_value)).apply();
         trackCarPrefs.edit().putString(KEY_DEVICE, getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.DEVICE_ID, "")).apply();
         trackCarPrefs.edit().putString(KEY_ACCURACY, "high").apply();
+        trackCarPrefs.edit().putString(KEY_INTERVAL, "0").apply();
+        trackCarPrefs.edit().putString(KEY_DISTANCE, "0").apply();
         /*trackCarPrefs.edit().putString(KEY_DEVICE, "12345678").apply();*/
         databaseHelper = new DatabaseHelper(this);
-        new TrackingController(this,new TextToVoice(this));
+        new TrackingController(this);
         startTrackingService(true, false);
 
         /**/
@@ -203,7 +203,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
             new LinearSnapHelper().attachToRecyclerView(priceListView);
         }
         routeStationListsForInfinite = databaseHelper.routeStationLists();
-        priceAdapterPrices = new PriceAdapterPrices(routeStationListsForInfinite, this,new TextToVoice(this));
+        priceAdapterPrices = new PriceAdapterPrices(routeStationListsForInfinite, this, databaseHelper);
 
 
         gridLayoutManager = new GridLayoutManager(this, spanCount);
@@ -318,6 +318,9 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
                 alertDialog.show();
 
 
+
+
+
             }
         });
 
@@ -380,10 +383,19 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
 
 //        showBluetoothDeviceChooseDialog();
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (isReadStorageAllowed()) {
+                new GetAdvertisements(this).getAdv();
+            }
+        } else {
+            new GetAdvertisements(this).getAdv();
+        }
 
-        new GetAdvertisements(this).getAdv();
+
+
 
     }
+
 
     private void setMode(int modeType, int spanCount, String modeStr) {
         getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putInt(UtilStrings.MODE, modeType).apply();
@@ -600,10 +612,27 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
             for (int result : grantResults) {
                 if (result != PackageManager.PERMISSION_GRANTED) {
                     granted = false;
+
+
                     break;
+                } else {
+
+                    if (!isReadStorageAllowed()) {
+                        requestStoragePermission();
+                    }
                 }
             }
+
             startTrackingService(false, granted);
+        } else if (requestCode == STORAGE_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                new GetAdvertisements(this).getAdv();
+            } else {
+                //Displaying another toast if permission is not granted
+                requestStoragePermission();
+
+            }
         }
     }
 
@@ -788,7 +817,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
 
                 }*/
 
-                float distance, nearest = 0;
+              /*  float distance, nearest = 0;
 
                 for (int i = 0; i < databaseHelper.routeStationLists().size(); i++) {
                     double startLat = Double.parseDouble(getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.LATITUDE, "0.0"));
@@ -806,7 +835,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
                         }
 
                     }
-                }
+                }*/
                 rHandler.postAtTime(rTicker, next);
             }
         }
@@ -815,5 +844,33 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         rTicker.run();
 
     }
+
+
+    private void requestStoragePermission() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE) && ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            //If the user has denied the permission previously your code will come to this block
+            //Here you can explain why you need this permission
+            //Explain here why you need this permission
+        }
+
+        //And finally ask for the permission
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_PERMISSION_CODE);
+
+    }
+
+    private boolean isReadStorageAllowed() {
+
+        //Getting the permission status
+        int read = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+        int write = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        //If permission is granted returning true
+        if (read == PackageManager.PERMISSION_GRANTED && write == PackageManager.PERMISSION_GRANTED)
+            return true;
+
+        //If permission is not granted returning false
+        return false;
+    }
+
 
 }

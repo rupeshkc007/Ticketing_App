@@ -111,7 +111,7 @@ public class ShortcutActivity extends AppCompatActivity {
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         String provider = PositionProvider.getProvider(
-                preferences.getString(MainFragment.KEY_ACCURACY, "medium"));
+                preferences.getString(MainFragment.KEY_ACCURACY, "high"));
 
         try {
             Location location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);

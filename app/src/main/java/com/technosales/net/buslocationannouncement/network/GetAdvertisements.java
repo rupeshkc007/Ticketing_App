@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
@@ -48,6 +49,7 @@ public class GetAdvertisements {
                             ContentValues contentValues = new ContentValues();
                             contentValues.put(DatabaseHelper.ADVERTISEMENT_ID, ad_id);
                             contentValues.put(DatabaseHelper.ADVERTISEMENT_COUNT, ad_count);
+//                            contentValues.put(DatabaseHelper.ADVERTISEMENT_STATIONS,"1003");
                             contentValues.put(DatabaseHelper.ADVERTISEMENT_STATIONS, station_id[j]);
                             contentValues.put(DatabaseHelper.ADVERTISEMENT_FILE, ad_file[1]);
                             databaseHelper.insertAdv(contentValues);
@@ -61,14 +63,14 @@ public class GetAdvertisements {
         });
     }
 
-    public void downloadFile(String fileName) {
+    private void downloadFile(String fileName) {
         File ext = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         File target = new File(ext, fileName);
         AQuery aq = new AQuery(context);
         aq.download("http://202.52.240.149:85/routemanagement/public/storage/adv_files/" + fileName, target, new AjaxCallback<File>() {
             public void callback(String url, File file, AjaxStatus status) {
                 if (file != null) {
-
+                    Toast.makeText(context, "Download", Toast.LENGTH_SHORT).show();
                 } else {
 
                 }

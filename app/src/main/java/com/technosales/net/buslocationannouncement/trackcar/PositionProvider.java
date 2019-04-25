@@ -61,7 +61,7 @@ public class PositionProvider implements LocationListener {
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
         deviceId = preferences.getString(MainFragment.KEY_DEVICE, "undefined");
-        interval = Long.parseLong(preferences.getString(MainFragment.KEY_INTERVAL, "600")) * 1000;
+        interval = Long.parseLong(preferences.getString(MainFragment.KEY_INTERVAL, "0")) * 1000;
         distance = Integer.parseInt(preferences.getString(MainFragment.KEY_DISTANCE, "0"));
         angle = Integer.parseInt(preferences.getString(MainFragment.KEY_ANGLE, "0"));
     }
@@ -70,7 +70,7 @@ public class PositionProvider implements LocationListener {
     public void startUpdates() {
         try {
             locationManager.requestLocationUpdates(
-                    getProvider(preferences.getString(MainFragment.KEY_ACCURACY, "medium")),
+                    getProvider(preferences.getString(MainFragment.KEY_ACCURACY, "high")),
                     distance > 0 || angle > 0 ? MINIMUM_INTERVAL : interval, 0, this);
         } catch (RuntimeException e) {
             Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
