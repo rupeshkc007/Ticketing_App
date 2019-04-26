@@ -185,4 +185,7 @@ public class GeneralUtils {
             Log.e("Exception", "File write failed: " + e.toString());
         }
     }
+    public static long getDelayTime(int charLength) {
+        return charLength / 12 * 1000 + 1000;
+    }
 }

@@ -383,13 +383,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
 
 //        showBluetoothDeviceChooseDialog();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (isReadStorageAllowed()) {
-                new GetAdvertisements(this).getAdv();
-            }
-        } else {
-            new GetAdvertisements(this).getAdv();
-        }
+
 
 
 
@@ -427,6 +421,15 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
 
             getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.RESET, true).apply();
             TicketInfoDataPush.resetData(TicketAndTracking.this);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (isReadStorageAllowed()) {
+                    new GetAdvertisements(this).getAdv();
+                }
+            } else {
+                new GetAdvertisements(this).getAdv();
+            }
+
         }
     }
 

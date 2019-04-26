@@ -7,6 +7,6 @@ public class AdvertiseList {
     }
 
     public File adFile;
-    public int adCount;
+    public int adCount,adType;
     public String adId, adStation;
 }

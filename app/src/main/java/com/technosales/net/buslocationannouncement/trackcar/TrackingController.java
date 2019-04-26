@@ -39,6 +39,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 public class TrackingController implements PositionProvider.PositionListener, NetworkManager.NetworkHandler {
 
@@ -326,19 +327,21 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
                     length = mediaPlayer.getCurrentPosition();
                 } else {
                     isPaused = false;
-                    try {
-                            mediaPlayer.stop();
-                            mediaPlayer.release();
-                            mediaPlayer = null;
-
-                    } catch (Exception ex) {
-                        Log.e("PlayerEx", "" + ex.toString());
-                    }
                 }
             } catch (Exception ex) {
 
             }
 
+        } else {
+            isPaused = false;
+            try {
+                mediaPlayer.stop();
+                mediaPlayer.release();
+                mediaPlayer = null;
+
+            } catch (Exception ex) {
+                Log.e("PlayerEx", "" + ex.toString());
+            }
         }
         String speakVoice = context.getString(R.string.hamiahile) + current + ", " + context.getString(R.string.aaipugeu) + next + ", " + context.getString(R.string.pugnechau);
         textToSpeech.speak(speakVoice, TextToSpeech.QUEUE_FLUSH, null);
@@ -382,11 +385,24 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
                     if (isPaused) {
                         mediaPlayer.seekTo(length);
                         mediaPlayer.start();
+                    } else {
+
+
+                        // play info & guidance here
+
+                        databaseHelper.noticeList();
+                        if (databaseHelper.noticeList().size() > 0) {
+                            Random r = new Random();
+                            int randomN = r.nextInt((databaseHelper.noticeList().size()));
+                            mediaPlayer = MediaPlayer.create(context, Uri.fromFile(databaseHelper.noticeList().get(randomN).adFile));
+                            mediaPlayer.start();
+                        }
+
                     }
 
                 }
             }
-        }, 5000);
+        }, GeneralUtils.getDelayTime(speakVoice.length()));
 
     }
 

@@ -50,7 +50,7 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    public static final int DATABASE_VERSION = 5;
+    public static final int DATABASE_VERSION = 6;
     public static final String DATABASE_NAME = "traccar.db";
 
     public static final String ROUTE_STATION_TABLE = "route_station";
@@ -90,6 +90,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String ADVERTISEMENT_STATIONS = "ad_stations";
     public static final String ADVERTISEMENT_FILE = "ad_file";
     public static final String ADVERTISEMENT_COUNT = "ad_count";
+    public static final String ADVERTISEMENT_TYPE = "ad_type";
     private final Context context;
 
 
@@ -200,6 +201,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 ADVERTISEMENT_ID + " TEXT," +
                 ADVERTISEMENT_STATIONS + " TEXT," +
                 ADVERTISEMENT_FILE + " TEXT," +
+                ADVERTISEMENT_TYPE + " INTEGER," +
                 ADVERTISEMENT_COUNT + " INTEGER)");
 
 
@@ -713,7 +715,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public ArrayList<AdvertiseList> adFilename(String stationId) {
         ArrayList<AdvertiseList> adList = new ArrayList<>();
-        String sql = "SELECT * FROM " + ADVERTISEMENT_TABLE + " WHERE " + ADVERTISEMENT_STATIONS + " ='" + stationId + "' AND " + ADVERTISEMENT_COUNT + ">" + 0;
+        String sql = "SELECT * FROM " + ADVERTISEMENT_TABLE + " WHERE " + ADVERTISEMENT_STATIONS + " ='" + stationId + "' AND " + ADVERTISEMENT_COUNT + ">" + 0+" AND "+ADVERTISEMENT_TYPE+" ="+UtilStrings.TYPE_ADV;
         Cursor c = getWritableDatabase().rawQuery(sql, null);
         while (c.moveToNext()) {
             AdvertiseList advertiseList = new AdvertiseList();
@@ -724,7 +726,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             advertiseList.adCount = c.getInt(c.getColumnIndex(ADVERTISEMENT_COUNT));
             advertiseList.adStation = c.getString(c.getColumnIndex(ADVERTISEMENT_STATIONS));
             advertiseList.adId = c.getString(c.getColumnIndex(ADVERTISEMENT_ID));
+            advertiseList.adType = c.getType(c.getColumnIndex(ADVERTISEMENT_TYPE));
+            Log.i("updateSql", "" + advertiseList.adCount);
+            adList.add(advertiseList);
+        }
+        c.close();
 
+        return adList;
+    }
+    public ArrayList<AdvertiseList> noticeList() {
+        ArrayList<AdvertiseList> adList = new ArrayList<>();
+        String sql = "SELECT * FROM " + ADVERTISEMENT_TABLE + " WHERE " + ADVERTISEMENT_TYPE+" ="+UtilStrings.TYPE_NOTICE;
+        Cursor c = getWritableDatabase().rawQuery(sql, null);
+        while (c.moveToNext()) {
+            AdvertiseList advertiseList = new AdvertiseList();
+            File dwnloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            advertiseList.adFile = new File(dwnloadDir, c.getString(c.getColumnIndex(ADVERTISEMENT_FILE)));
+            Log.i("updateSql", "" + advertiseList.adCount);
             adList.add(advertiseList);
         }
         c.close();
@@ -732,8 +750,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return adList;
     }
 
+
     public void updateAdCount(String adId) {
-        getWritableDatabase().execSQL("UPDATE " + ADVERTISEMENT_TABLE + " SET " + ADVERTISEMENT_COUNT + " =" + ADVERTISEMENT_COUNT + "-1 WHERE " + ADVERTISEMENT_ID + " ='" + adId + "'");
+        String sql = "UPDATE " + ADVERTISEMENT_TABLE + " SET " + ADVERTISEMENT_COUNT + " =" + ADVERTISEMENT_COUNT + "-1 WHERE " + ADVERTISEMENT_ID + " ='" + adId + "'";
+        getWritableDatabase().execSQL(sql);
+
     }
 
 }

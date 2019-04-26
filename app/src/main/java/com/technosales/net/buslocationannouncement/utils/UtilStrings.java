@@ -51,4 +51,8 @@ public class UtilStrings {
     public static final int MODE_2 = 2;//// location suggestion wrt prices
     public static final int MODE_3 = 3;//// price calculations with route
 
+
+    public static final int TYPE_ADV = 0;
+    public static final int TYPE_NOTICE = 1;
+
 }
