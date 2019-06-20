@@ -146,11 +146,12 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                         }
 
                     }
+                    Log.i("nearest", "asdasda" + startLat + "::" + startLng + "::" + endLat + "::" + endLng);
                 }
                 if (routeType == UtilStrings.NON_RING_ROAD) {
                     price = databaseHelper.priceWrtDistance(Math.abs(currentStationDistance - routeStationModelList.station_distance), ((TicketAndTracking) context).normalDiscountToggle.isOn());
 
-
+                    totalDistance = Math.abs(currentStationDistance - routeStationModelList.station_distance);
                     Log.i("priceWrt", price);
 
                 } else {
@@ -291,10 +292,15 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
 
                                                                                    }*/
 
+                            float distanceInKm = (totalDistance / 1000);
+                            String strTotal = distanceInKm + "";
+                            if (strTotal.length() > 4) {
+                                strTotal = strTotal.substring(0, 4);
+                            }
                             //imageprint
                             ((TicketAndTracking) context).mBitmap = drawText(busName + "\n" +
                                     GeneralUtils.getUnicodeNumber(ticketInfoList.ticketNumber) + "\n" +
-                                    "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.ticketPrice) + discountType + "\n" +
+                                    GeneralUtils.getUnicodeNumber(strTotal) + "कि.मी , रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.ticketPrice) + discountType + "\n" +
                                     nearestName + "-" + routeStationModelList.station_name + "\n" +
                                     GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +

@@ -186,6 +186,6 @@ public class GeneralUtils {
         }
     }
     public static long getDelayTime(int charLength) {
-        return charLength / 12 * 1000 + 1000;
+        return charLength / 12 * 1000 + 3000;
     }
 }

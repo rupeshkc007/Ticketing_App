@@ -92,7 +92,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
 
         if (((TicketAndTracking) context).normalDiscountToggle.isOn()) {
             holder.price_value.setText(priceList.price_discount_value);
-            priceList.price_value =priceList.price_discount_value;
+            priceList.price_value = priceList.price_discount_value;
             holder.price_value.setTextColor(context.getResources().getColorStateList(R.color.discount_txt_color));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 holder.price_value.setBackground(ContextCompat.getDrawable(context, R.drawable.discount_price_bg));
@@ -114,7 +114,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                 preferences = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0);
                 databaseHelper = new DatabaseHelper(context);
                 routeStationLists = databaseHelper.routeStationLists();
-                route_type = preferences.getInt(UtilStrings.ROUTE_TYPE,UtilStrings.NON_RING_ROAD);
+                route_type = preferences.getInt(UtilStrings.ROUTE_TYPE, UtilStrings.NON_RING_ROAD);
 
                 float distance = 0;
                 float nearest = 0;
@@ -131,7 +131,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                         if (distance < nearest) {
                             nearest = distance;
                             nearest_name = routeStationLists.get(i).station_name;
-                            if (route_type==UtilStrings.NON_RING_ROAD){
+                            if (route_type == UtilStrings.NON_RING_ROAD) {
 
                                 nearestDistance = routeStationLists.get(i).station_distance;
                             }
@@ -147,8 +147,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                 final ArrayList<String> stationsGetoff = new ArrayList<>();
 
 
-
-                if (route_type==UtilStrings.RING_ROAD){
+                if (route_type == UtilStrings.RING_ROAD) {
                     for (int i = 0; i < routeStationLists.size(); i++) {
                         if (forward) {
                             if (i >= orderPos) {
@@ -194,26 +193,29 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                         }
 
                     }
-                }else {
+                } else {
+                    float  calcDistance = 0;
                     for (int i = 0; i < routeStationLists.size(); i++) {
 
                         if (forward) {
 
                             if (i >= orderPos) {
-                                if (priceList.price_distance >= Math.abs(nearestDistance - routeStationLists.get(i).station_distance) && priceList.price_min_distance<=Math.abs(nearestDistance - routeStationLists.get(i).station_distance)) {
+                                if (priceList.price_distance >= Math.abs(nearestDistance - routeStationLists.get(i).station_distance) && priceList.price_min_distance <= Math.abs(nearestDistance - routeStationLists.get(i).station_distance)) {
                                     stationsGetoff.add(routeStationLists.get(i).station_name);
+                                    /*calcDistance = calcDistance+  routeStationLists.get(i).station_distance;*/
                                 }
                             }
                         } else {
                             if (i <= orderPos) {
-                                if (priceList.price_distance >= Math.abs(nearestDistance - routeStationLists.get(i).station_distance) && priceList.price_min_distance<=Math.abs(nearestDistance - routeStationLists.get(i).station_distance)) {
+                                if (priceList.price_distance >= Math.abs(nearestDistance - routeStationLists.get(i).station_distance) && priceList.price_min_distance <= Math.abs(nearestDistance - routeStationLists.get(i).station_distance)) {
                                     stationsGetoff.add(routeStationLists.get(i).station_name);
+                                    /*calcDistance = calcDistance+  routeStationLists.get(i).station_distance;*/
                                 }
                             }
                         }
                     }
+                    nearestDistance = Math.abs(nearestDistance - calcDistance);
                 }
-
 
 
                 Log.i("stationsGetoff", nearestDistance + "-" + route_type);
@@ -256,10 +258,10 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                         ((TicketAndTracking) context).setTotal();
                         String valueOfTickets = "";
                         if (total_tickets < 10) {
-                            valueOfTickets = "00" + String.valueOf(total_tickets+1);
+                            valueOfTickets = "00" + String.valueOf(total_tickets + 1);
 
                         } else if (total_tickets < 100) {
-                            valueOfTickets = "0" + String.valueOf(total_tickets+1);
+                            valueOfTickets = "0" + String.valueOf(total_tickets + 1);
                         } else {
                             valueOfTickets = String.valueOf(total_tickets);
                         }
@@ -289,7 +291,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
                         ticketInfoList.ticketLng = longitude;
                         ticketInfoList.helper_id = helperId;
 
-                        String completeInfoStr =busName + "\n" +
+                        String completeInfoStr = busName + "\n" +
                                 GeneralUtils.getUnicodeNumber(ticketInfoList.ticketNumber) + "\n" +
                                 "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.ticketPrice) + discountType + "\n" +
                                 nearest_name + "-" + toGetOff + "\n" +

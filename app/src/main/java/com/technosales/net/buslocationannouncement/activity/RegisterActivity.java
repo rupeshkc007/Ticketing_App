@@ -2,6 +2,7 @@ package com.technosales.net.buslocationannouncement.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Handler;
 import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -21,6 +22,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     private TextInputEditText reg_device_number;
     private SharedPreferences sharedPreferences;
     private DatabaseHelper databaseHelper;
+    private Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +53,8 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         btn_reg = findViewById(R.id.btn_reg);
         btn_reg.setOnClickListener(this);
 
-        reg_device_number.setText("8170613861");
+//        reg_device_number.setText("8170613861");
+        /*reg_device_number.setText("8170613553");*/
     }
 
     @Override

@@ -750,6 +750,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return adList;
     }
 
+    public int noticeAdSize(){
+        ArrayList<AdvertiseList> adList = new ArrayList<>();
+        String sql = "SELECT * FROM " + ADVERTISEMENT_TABLE;
+        Cursor c = getWritableDatabase().rawQuery(sql, null);
+        while (c.moveToNext()) {
+            AdvertiseList advertiseList = new AdvertiseList();
+            advertiseList.adType =  c.getInt(c.getColumnIndex(ADVERTISEMENT_TYPE));
+            Log.i("updateSql", "" + advertiseList.adCount);
+            adList.add(advertiseList);
+        }
+        c.close();
+
+        return adList.size();
+    }
+
 
     public void updateAdCount(String adId) {
         String sql = "UPDATE " + ADVERTISEMENT_TABLE + " SET " + ADVERTISEMENT_COUNT + " =" + ADVERTISEMENT_COUNT + "-1 WHERE " + ADVERTISEMENT_ID + " ='" + adId + "'";

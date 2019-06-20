@@ -41,7 +41,7 @@ public class UtilStrings {
     public static final String TICKET_POST = TICKET_URL + "store_ticket";
     public static final String TICKET_REGISTER_DEVICE = TICKET_URL + "register";
 //    public static final String ADVERTISEMENTS_URL = "http://172.16.1.131:85/routemanagement/api/adv/getAdvertisement/";
-    public static final String ADVERTISEMENTS_URL = "http://202.52.240.149:85/routemanagement/api/adv/getAdvertisement/";
+    public static final String ADVERTISEMENTS_URL = TICKET_URL+"adv/getAdvertisement/";
 
 
     public static final int RING_ROAD = 0;/// for ring road

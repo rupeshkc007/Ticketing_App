@@ -94,7 +94,7 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
                 }
             }
         });
-        textToSpeech.setPitch(1.1f);
+//        textToSpeech.setPitch(0.99f);
 
         positionProvider = new PositionProvider(context, this);
         databaseHelper = new DatabaseHelper(context);
@@ -351,36 +351,48 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
             @Override
             public void run() {
                 if (adList.size() > 0) {
-                    mediaPlayer = MediaPlayer.create(context, Uri.fromFile(adList.get(0).adFile));
-                    mediaPlayer.start();
-                    mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                        @Override
-                        public void onCompletion(MediaPlayer mp) {
-                            databaseHelper.updateAdCount(adList.get(0).adId);
-                            if (adList.size() > 1) {
-                                mediaPlayer = mp;
-                                mediaPlayer = MediaPlayer.create(context, Uri.fromFile(adList.get(1).adFile));
-                                mediaPlayer.start();
-                                mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                    @Override
-                                    public void onCompletion(MediaPlayer mp) {
-                                        if (adList.size() > 2) {
-                                            databaseHelper.updateAdCount(adList.get(1).adId);
-                                            mediaPlayer = mp;
-                                            mediaPlayer = MediaPlayer.create(context, Uri.fromFile(adList.get(2).adFile));
-                                            mediaPlayer.start();
-                                            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                                @Override
-                                                public void onCompletion(MediaPlayer mp) {
-                                                    databaseHelper.updateAdCount(adList.get(2).adId);
+
+                    File file0 = adList.get(0).adFile;
+                    if (file0.exists()) {
+                        mediaPlayer = MediaPlayer.create(context, Uri.fromFile(file0));
+                        mediaPlayer.start();
+                        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                            @Override
+                            public void onCompletion(MediaPlayer mp) {
+                                databaseHelper.updateAdCount(adList.get(0).adId);
+                                if (adList.size() > 1) {
+                                    File file1 = adList.get(1).adFile;
+                                    if (file1.exists()) {
+                                        mediaPlayer = mp;
+                                        mediaPlayer = MediaPlayer.create(context, Uri.fromFile(file1));
+                                        mediaPlayer.start();
+                                        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                            @Override
+                                            public void onCompletion(MediaPlayer mp) {
+                                                databaseHelper.updateAdCount(adList.get(1).adId);
+                                                if (adList.size() > 2) {
+                                                    File file2 = adList.get(2).adFile;
+                                                    if (file2.exists()) {
+                                                        mediaPlayer = mp;
+                                                        mediaPlayer = MediaPlayer.create(context, Uri.fromFile(file2));
+                                                        mediaPlayer.start();
+                                                        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                                            @Override
+                                                            public void onCompletion(MediaPlayer mp) {
+                                                                databaseHelper.updateAdCount(adList.get(2).adId);
+                                                            }
+                                                        });
+                                                    }
+
                                                 }
-                                            });
-                                        }
+                                            }
+                                        });
                                     }
-                                });
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
+
                 } else {
                     if (isPaused) {
                         mediaPlayer.seekTo(length);
@@ -394,8 +406,14 @@ public class TrackingController implements PositionProvider.PositionListener, Ne
                         if (databaseHelper.noticeList().size() > 0) {
                             Random r = new Random();
                             int randomN = r.nextInt((databaseHelper.noticeList().size()));
-                            mediaPlayer = MediaPlayer.create(context, Uri.fromFile(databaseHelper.noticeList().get(randomN).adFile));
-                            mediaPlayer.start();
+
+                            Log.i("randomSize", "" + databaseHelper.noticeList().size() + "::" + randomN);
+                            File noticeFile = databaseHelper.noticeList().get(randomN).adFile;
+                            if (noticeFile.exists()) {
+                                mediaPlayer = MediaPlayer.create(context, Uri.fromFile(noticeFile));
+                                mediaPlayer.start();
+                            }
+
                         }
 
                     }

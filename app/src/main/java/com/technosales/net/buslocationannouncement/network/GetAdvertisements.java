@@ -27,8 +27,8 @@ public class GetAdvertisements {
     public void getAdv() {
         AQuery aQuery = new AQuery(context);
         final DatabaseHelper databaseHelper = new DatabaseHelper(context);
-        aQuery.ajax(UtilStrings.ADVERTISEMENTS_URL + "9842721343", JSONObject.class, new AjaxCallback<JSONObject>() {
-            //        aQuery.ajax(UtilStrings.ADVERTISEMENTS_URL + context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.DEVICE_ID, ""), JSONArray.class, new AjaxCallback<JSONArray>() {
+//        aQuery.ajax(UtilStrings.ADVERTISEMENTS_URL + "9842721343", JSONObject.class, new AjaxCallback<JSONObject>() {
+        aQuery.ajax(UtilStrings.ADVERTISEMENTS_URL + context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.DEVICE_ID, ""), JSONObject.class, new AjaxCallback<JSONObject>() {
             @Override
             public void callback(String url, JSONObject object, AjaxStatus status) {
                 super.callback(url, object, status);
@@ -79,7 +79,7 @@ public class GetAdvertisements {
         File ext = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         File target = new File(ext, fileName);
         AQuery aq = new AQuery(context);
-        aq.download("http://202.52.240.149:85/routemanagement/public/storage/adv_files/" + fileName, target, new AjaxCallback<File>() {
+        aq.download("http://117.121.237.226:83/routemanagement/public/storage/adv_files/" + fileName, target, new AjaxCallback<File>() {
             public void callback(String url, File file, AjaxStatus status) {
                 if (file != null) {
                     Toast.makeText(context, fileName + " Download", Toast.LENGTH_SHORT).show();

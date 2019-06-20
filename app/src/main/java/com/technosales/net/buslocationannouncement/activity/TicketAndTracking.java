@@ -318,9 +318,6 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
                 alertDialog.show();
 
 
-
-
-
             }
         });
 
@@ -359,7 +356,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
 
                     if ((visibleItemCount + pastVisiblesItems) >= totalItemCount - 9) {
                         mode = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.MODE, UtilStrings.MODE_3);
-                        if (mode == UtilStrings.MODE_3) {
+                        if (mode == UtilStrings.MODE_3 && getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.ROUTE_TYPE, UtilStrings.NON_RING_ROAD) == UtilStrings.RING_ROAD) {
                             routeStationListsForInfinite.addAll(databaseHelper.routeStationLists());
                             priceAdapterPrices.notifyDataChange(routeStationListsForInfinite);
                         }
@@ -381,11 +378,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         /*showUSBDeviceChooseDialog();    //use for voting*/
 
 
-//        showBluetoothDeviceChooseDialog();
-
-
-
-
+        showBluetoothDeviceChooseDialog();
 
 
     }
@@ -430,6 +423,16 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
                 new GetAdvertisements(this).getAdv();
             }
 
+        } else {
+            if (databaseHelper.noticeAdSize() == 0) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (isReadStorageAllowed()) {
+                        new GetAdvertisements(this).getAdv();
+                    }
+                } else {
+                    new GetAdvertisements(this).getAdv();
+                }
+            }
         }
     }
 
