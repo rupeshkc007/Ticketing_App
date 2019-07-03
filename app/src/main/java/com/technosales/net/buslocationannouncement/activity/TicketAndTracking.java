@@ -36,6 +36,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
@@ -70,6 +71,7 @@ import com.technosales.net.buslocationannouncement.adapter.PriceAdapterPlaces;
 import com.technosales.net.buslocationannouncement.adapter.PriceAdapterPrices;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.network.GetAdvertisements;
+import com.technosales.net.buslocationannouncement.network.GetPricesFares;
 import com.technosales.net.buslocationannouncement.network.TicketInfoDataPush;
 import com.technosales.net.buslocationannouncement.pojo.HelperList;
 import com.technosales.net.buslocationannouncement.pojo.PriceList;
@@ -99,7 +101,7 @@ import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_INTERVAL;
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_URL;
 
-public class TicketAndTracking extends AppCompatActivity implements PrinterObserver {
+public class TicketAndTracking extends AppCompatActivity implements PrinterObserver, GetPricesFares.OnPriceUpdate {
 
     private static final int PERMISSIONS_REQUEST_LOCATION = 2;
     private static final int ALARM_MANAGER_INTERVAL = 15000;
@@ -117,6 +119,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
     private TextView route_name;
     public TextView helperName;
     private TextView mode_selector;
+    private ImageView settingMenu;
 
 
     /////
@@ -177,6 +180,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         helperName = findViewById(R.id.helperName);
         mainToolBar = findViewById(R.id.mainToolBar);
         mode_selector = findViewById(R.id.mode_selector);
+        settingMenu = findViewById(R.id.settingMenu);
 
         setSupportActionBar(mainToolBar);
         Drawable drawable = ContextCompat.getDrawable(getApplicationContext(), R.mipmap.helper_choose);
@@ -257,6 +261,28 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
                 popup.show();
             }
         });
+        settingMenu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu popup = new PopupMenu(TicketAndTracking.this, settingMenu);
+                //inflating menu from xml resource
+                popup.inflate(R.menu.pop_up_menu);
+                //adding click listener
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        if (item.getItemId() == R.id.updateFare) {
+                            new GetPricesFares(TicketAndTracking.this, TicketAndTracking.this).getFares(getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.DEVICE_ID, ""), true);
+                            return true;
+                        }
+                        return true;
+
+                    }
+                });
+                //displaying the popup
+                popup.show();
+            }
+        });
 
 
         normalDiscountToggle.setOnToggledListener(new OnToggledListener() {
@@ -302,7 +328,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
             @Override
             public void onClick(View v) {
 
-                AlertDialog alertDialog = new AlertDialog.Builder(TicketAndTracking.this).create();
+             /*   AlertDialog alertDialog = new AlertDialog.Builder(TicketAndTracking.this).create();
                 alertDialog.setTitle("Clear Data");
                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                         new DialogInterface.OnClickListener() {
@@ -316,7 +342,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
                             }
                         });
                 alertDialog.show();
-
+*/
 
             }
         });
@@ -378,7 +404,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         /*showUSBDeviceChooseDialog();    //use for voting*/
 
 
-        showBluetoothDeviceChooseDialog();
+//        showBluetoothDeviceChooseDialog();
 
 
     }
@@ -413,7 +439,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
             setTotal();
 
             getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.RESET, true).apply();
-            TicketInfoDataPush.resetData(TicketAndTracking.this);
+            /*TicketInfoDataPush.resetData(TicketAndTracking.this);*/
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (isReadStorageAllowed()) {
@@ -879,4 +905,9 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
     }
 
 
+    @Override
+    public void onPriceUpdate() {
+        startActivity(new Intent(this, TicketAndTracking.class));
+        finish();
+    }
 }

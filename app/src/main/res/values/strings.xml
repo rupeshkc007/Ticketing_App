@@ -195,5 +195,6 @@
     <string name="normal_mode">Normal</string>
     <string name="places_mode">Places</string>
     <string name="price_mode">Price</string>
+    <string name="update_fare">Update Fare</string>
 
 </resources>

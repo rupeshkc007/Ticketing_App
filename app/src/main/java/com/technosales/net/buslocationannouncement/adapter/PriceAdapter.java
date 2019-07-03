@@ -136,7 +136,8 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
                 }
 
                 AlertDialog alertDialog = new AlertDialog.Builder(context).create();
-                alertDialog.setTitle("रु. " + priceList.price_value + " " + nearest_name);
+                alertDialog.setTitle("रु. " + priceList.price_value /*+ " " + nearest_name*/);
+//                alertDialog.setTitle("रु. " + priceList.price_value + " " + nearest_name);
                 alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
@@ -222,13 +223,13 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
                                                                                    }*/
 
                                     //imageprint
-                                     ((TicketAndTracking) context).mBitmap = drawText(busName + "\n" +
+                                    /* ((TicketAndTracking) context).mBitmap = drawText(busName + "\n" +
                                              GeneralUtils.getUnicodeNumber(ticketInfoList.ticketNumber) + "\n" +
                                              "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.ticketPrice) + discountType + "\n" +
-                                             nearest_name + "\n" +
+                                             *//*nearest_name + "\n" +*//*
                                              GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                                              + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
-                                             GeneralUtils.getUnicodeNumber(GeneralUtils.getTime()), 380);
+                                             GeneralUtils.getUnicodeNumber(GeneralUtils.getTime()), 380);*/
                                 } else {
                                     ((TicketAndTracking) context).helperName.setText("सहायक छान्नुहोस् ।");
                                 }

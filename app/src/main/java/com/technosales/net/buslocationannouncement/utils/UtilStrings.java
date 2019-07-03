@@ -34,7 +34,7 @@ public class UtilStrings {
 //            public static final String TICKET_URL = "http://172.16.1.131:85/routemanagement/api/";/// server
     public static final String TICKET_URL = "http://117.121.237.226:83/routemanagement/api/";/// production
     //    public static final String TICKET_URL = "http://202.52.240.149:85/routemanagement/api/";////testServer
-    public static final String TICKET_PRICE_LIST = "http://202.52.240.149:85/routemanagement/api/get_fare";
+    public static final String TICKET_PRICE_LIST = "http://117.121.237.226:83/routemanagement/api/get_fare_by_device/";
 //        public static final String TICKET_PRICE_LIST = "http://172.16.1.131:85/routemanagement/api/get_fare";
     public static final String UPDATE_TICKET = TICKET_URL + "update_device_info";
     public static final String RESET_DEVICE = TICKET_URL + "reset_device";

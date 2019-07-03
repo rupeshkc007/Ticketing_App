@@ -63,7 +63,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             case R.id.btn_reg:
 
                 if (reg_device_number.getText().toString().trim().length() > 0) {
-                        new GetPricesFares(this).getFares(reg_device_number.getText().toString().trim());
+                        new GetPricesFares(this,null).getFares(reg_device_number.getText().toString().trim(),false);
                     sharedPreferences.edit().putString(UtilStrings.DEVICE_ID, reg_device_number.getText().toString().trim()).apply();
                 } else {
                     reg_device_number.setError("Enter Device Number");
