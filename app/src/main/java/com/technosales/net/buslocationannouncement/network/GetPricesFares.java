@@ -9,7 +9,6 @@ import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
-import com.technosales.net.buslocationannouncement.utils.TextToVoice;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
 
 import org.json.JSONArray;

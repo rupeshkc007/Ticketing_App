@@ -24,24 +24,24 @@ public class UtilStrings {
     public static final String CURRENT_ID = "current_id";
 
 
-//            public static final String MAIN_URL = "http://172.16.1.131:85/route_api/public/api/";//server
+    //            public static final String MAIN_URL = "http://172.16.1.131:85/route_api/public/api/";//server
 //    public static final String MAIN_URL = "http://202.52.240.149:85/route_api/public/api/";//test---8170613861
     public static final String MAIN_URL = "http://202.52.240.149/route_api_v2/public/api/";//production
     public static final String REGISTER_URL = MAIN_URL + "routeDevice";
     public static final String ROUTE_STATION = MAIN_URL + "getRouteStation";
 
 
-//            public static final String TICKET_URL = "http://172.16.1.131:85/routemanagement/api/";/// server
+    //            public static final String TICKET_URL = "http://172.16.1.131:85/routemanagement/api/";/// server
     public static final String TICKET_URL = "http://117.121.237.226:83/routemanagement/api/";/// production
     //    public static final String TICKET_URL = "http://202.52.240.149:85/routemanagement/api/";////testServer
     public static final String TICKET_PRICE_LIST = "http://117.121.237.226:83/routemanagement/api/get_fare_by_device/";
-//        public static final String TICKET_PRICE_LIST = "http://172.16.1.131:85/routemanagement/api/get_fare";
+    //        public static final String TICKET_PRICE_LIST = "http://172.16.1.131:85/routemanagement/api/get_fare";
     public static final String UPDATE_TICKET = TICKET_URL + "update_device_info";
     public static final String RESET_DEVICE = TICKET_URL + "reset_device";
     public static final String TICKET_POST = TICKET_URL + "store_ticket";
     public static final String TICKET_REGISTER_DEVICE = TICKET_URL + "register";
-//    public static final String ADVERTISEMENTS_URL = "http://172.16.1.131:85/routemanagement/api/adv/getAdvertisement/";
-    public static final String ADVERTISEMENTS_URL = TICKET_URL+"adv/getAdvertisement/";
+    //    public static final String ADVERTISEMENTS_URL = "http://172.16.1.131:85/routemanagement/api/adv/getAdvertisement/";
+    public static final String ADVERTISEMENTS_URL = TICKET_URL + "adv/getAdvertisement/";
 
 
     public static final int RING_ROAD = 0;/// for ring road
@@ -54,5 +54,7 @@ public class UtilStrings {
 
     public static final int TYPE_ADV = 0;
     public static final int TYPE_NOTICE = 1;
+
+    public static final String FIRST_RUN = "first_run";
 
 }

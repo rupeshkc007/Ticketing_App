@@ -41,14 +41,13 @@ public class TicketInfoDataPush {
                     @Override
                     public void callback(String url, JSONObject object, AjaxStatus status) {
                         super.callback(url, object, status);
-                        Log.i("getParams", object + ticketInfoList.ticketNumber);
+                        Log.i("getParams", object + ticketInfoList.ticketNumber + url);
                         if (object != null) {
                             if (object.optString("error").equals("false") || object.optString("error").equals("true")) {
                                 new DatabaseHelper(context).deleteFromLocalId(ticketInfoList.ticketNumber);
                             }
-
-
                         } else {
+
                         }
                     }
                 }.timeout(1000 * 60 * 15));
@@ -74,18 +73,13 @@ public class TicketInfoDataPush {
                 @Override
                 public void callback(String url, JSONObject object, AjaxStatus status) {
                     super.callback(url, object, status);
-                    Log.i("getParams", object + ":" + params + ":"+UtilStrings.UPDATE_TICKET);
+                    Log.i("getParams", object + ":" + params + ":" + url);
                     if (object != null) {
                         if (object.optString("error").equals("false")) {
                             /*new DatabaseHelper(context).deleteFromLocalId(ticketInfoList.ticketNumber);*/
-
                             context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putInt(UtilStrings.SENT_TICKET, totalTicks).apply();
-
                         }
-
-
                     } else {
-
                         /*pushBusData(context, totalTicks, totalCollection);*/
                     }
                 }
@@ -105,7 +99,7 @@ public class TicketInfoDataPush {
                 @Override
                 public void callback(String url, JSONObject object, AjaxStatus status) {
                     super.callback(url, object, status);
-                    Log.i("getParams", object + ":" + params + ":"+UtilStrings.RESET_DEVICE);
+                    Log.i("getParams", object + ":" + params + ":" + UtilStrings.RESET_DEVICE);
                     if (object != null) {
                         if (object.optString("error").equals("false")) {
                             context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.RESET, false).apply();

@@ -144,10 +144,9 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
     private PriceAdapterPrices priceAdapterPrices;
     private List<RouteStationList> routeStationListsForInfinite;
     int listVisiblePosition;
+    private SharedPreferences preferences;
 
-
-    MediaPlayer mediaPlayer;
-    int length = 0;
+    private boolean isFirstRun;
 
 
     @Override
@@ -157,12 +156,13 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
 
 
         /**/
+        preferences = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0);
         alarmManager = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
         alarmIntent = PendingIntent.getBroadcast(this, 0, new Intent(this, AutostartReceiver.class), 0);
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         trackCarPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         trackCarPrefs.edit().putString(KEY_URL, getResources().getString(R.string.settings_url_default_value)).apply();
-        trackCarPrefs.edit().putString(KEY_DEVICE, getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.DEVICE_ID, "")).apply();
+        trackCarPrefs.edit().putString(KEY_DEVICE, preferences.getString(UtilStrings.DEVICE_ID, "")).apply();
         trackCarPrefs.edit().putString(KEY_ACCURACY, "high").apply();
         trackCarPrefs.edit().putString(KEY_INTERVAL, "0").apply();
         trackCarPrefs.edit().putString(KEY_DISTANCE, "0").apply();
@@ -186,13 +186,13 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         Drawable drawable = ContextCompat.getDrawable(getApplicationContext(), R.mipmap.helper_choose);
         mainToolBar.setOverflowIcon(drawable);
 
-        helperName.setText(getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.NAME_HELPER, ""));
-        mode = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.MODE, UtilStrings.MODE_3);
-        getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putInt(UtilStrings.ROUTE_LIST_SIZE, databaseHelper.routeStationLists().size()).apply();
+        helperName.setText(preferences.getString(UtilStrings.NAME_HELPER, ""));
+        mode = preferences.getInt(UtilStrings.MODE, UtilStrings.MODE_3);
+        preferences.edit().putInt(UtilStrings.ROUTE_LIST_SIZE, databaseHelper.routeStationLists().size()).apply();
 
 
         route_name.setSelected(true);
-        route_name.setText(getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.DEVICE_NAME, "") + "-" + getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.ROUTE_NAME, ""));
+        route_name.setText(preferences.getString(UtilStrings.DEVICE_NAME, "") + "-" + preferences.getString(UtilStrings.ROUTE_NAME, ""));
 
         normalDiscountToggle.setLabelOn(getString(R.string.discount_rate));
         normalDiscountToggle.setLabelOff(getString(R.string.normal_rate));
@@ -272,7 +272,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         if (item.getItemId() == R.id.updateFare) {
-                            new GetPricesFares(TicketAndTracking.this, TicketAndTracking.this).getFares(getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.DEVICE_ID, ""), true);
+                            new GetPricesFares(TicketAndTracking.this, TicketAndTracking.this).getFares(preferences.getString(UtilStrings.DEVICE_ID, ""), true);
                             return true;
                         }
                         return true;
@@ -288,10 +288,10 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         normalDiscountToggle.setOnToggledListener(new OnToggledListener() {
             @Override
             public void onSwitched(LabeledSwitch labeledSwitch, boolean isOn) {
-                mode = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.MODE, UtilStrings.MODE_3);
+                mode = preferences.getInt(UtilStrings.MODE, UtilStrings.MODE_3);
                 /*totalRemainingTickets.setText(GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.listTickets().size())) + "\n" + GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.remainingAmount())));
                 if (databaseHelper.listTickets().size() > 0) {
-                    boolean datasending = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getBoolean(UtilStrings.DATA_SENDING, false);
+                    boolean datasending = preferences.getBoolean(UtilStrings.DATA_SENDING, false);
                     if (!datasending) {
                         databaseHelper.ticketInfoLists();
                     }
@@ -334,8 +334,8 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
-                                getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().remove(UtilStrings.TOTAL_TICKETS).apply();
-                                getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().remove(UtilStrings.TOTAL_COLLECTIONS).apply();
+                                preferences.edit().remove(UtilStrings.TOTAL_TICKETS).apply();
+                                preferences.edit().remove(UtilStrings.TOTAL_COLLECTIONS).apply();
                                 setTotal();
                                 databaseHelper.clearAllFromData();
                                 databaseHelper.clearTxtTable();
@@ -381,8 +381,8 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
                     pastVisiblesItems = gridLayoutManager.findFirstVisibleItemPosition();
 
                     if ((visibleItemCount + pastVisiblesItems) >= totalItemCount - 9) {
-                        mode = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.MODE, UtilStrings.MODE_3);
-                        if (mode == UtilStrings.MODE_3 && getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.ROUTE_TYPE, UtilStrings.NON_RING_ROAD) == UtilStrings.RING_ROAD) {
+                        mode = preferences.getInt(UtilStrings.MODE, UtilStrings.MODE_3);
+                        if (mode == UtilStrings.MODE_3 && preferences.getInt(UtilStrings.ROUTE_TYPE, UtilStrings.NON_RING_ROAD) == UtilStrings.RING_ROAD) {
                             routeStationListsForInfinite.addAll(databaseHelper.routeStationLists());
                             priceAdapterPrices.notifyDataChange(routeStationListsForInfinite);
                         }
@@ -404,14 +404,14 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         /*showUSBDeviceChooseDialog();    //use for voting*/
 
 
-//        showBluetoothDeviceChooseDialog();
+        showBluetoothDeviceChooseDialog();
 
 
     }
 
 
     private void setMode(int modeType, int spanCount, String modeStr) {
-        getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putInt(UtilStrings.MODE, modeType).apply();
+        preferences.edit().putInt(UtilStrings.MODE, modeType).apply();
         gridLayoutManager = new GridLayoutManager(TicketAndTracking.this, spanCount);
         priceListView.setLayoutManager(gridLayoutManager);
         mode_selector.setText(modeStr);
@@ -430,15 +430,21 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
     }
 
     private void isToday() {
-        String isToday = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.DATE_TIME, "");
+        String isToday = preferences.getString(UtilStrings.DATE_TIME, "");
         if (!isToday.equals(GeneralUtils.getDate())) {
-            getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.DATE_TIME, GeneralUtils.getDate()).apply();
-            getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().remove(UtilStrings.TOTAL_TICKETS).apply();
-            getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().remove(UtilStrings.TOTAL_COLLECTIONS).apply();
+            preferences.edit().putString(UtilStrings.DATE_TIME, GeneralUtils.getDate()).apply();
+            preferences.edit().remove(UtilStrings.TOTAL_TICKETS).apply();
+            preferences.edit().remove(UtilStrings.TOTAL_COLLECTIONS).apply();
             new DatabaseHelper(this).clearTxtTable();
             setTotal();
+            isFirstRun = preferences.getBoolean(UtilStrings.FIRST_RUN, true);
+            if (isFirstRun) {
+                preferences.edit().putBoolean(UtilStrings.RESET, false).apply();
+            } else {
+                preferences.edit().putBoolean(UtilStrings.RESET, true).apply();
+            }
+            preferences.edit().putBoolean(UtilStrings.FIRST_RUN, false).apply();
 
-            getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.RESET, true).apply();
             /*TicketInfoDataPush.resetData(TicketAndTracking.this);*/
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -584,8 +590,8 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
     }
 
     public void setTotal() {
-        totalTickets = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.TOTAL_TICKETS, 0);
-        totalCollections = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.TOTAL_COLLECTIONS, 0);
+        totalTickets = preferences.getInt(UtilStrings.TOTAL_TICKETS, 0);
+        totalCollections = preferences.getInt(UtilStrings.TOTAL_COLLECTIONS, 0);
 //        totalCollectionTickets.setText("Total Tickets :" + String.valueOf(totalTickets) + "\n Total Colletions :" + String.valueOf(totalCollections));
         totalCollectionTickets.setText(getString(R.string.total_tickets) + GeneralUtils.getUnicodeNumber(String.valueOf(totalTickets)) + "\n" + getString(R.string.total_collections) + GeneralUtils.getUnicodeNumber(String.valueOf(totalCollections)));
 
@@ -784,10 +790,10 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         String helperNameId[] = name.split("-");
 
         /*helperName = helperNameId[1];*/
-        getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.ID_HELPER, helperNameId[0]).apply();
-        getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.NAME_HELPER, helperNameId[1]).apply();
+        preferences.edit().putString(UtilStrings.ID_HELPER, helperNameId[0]).apply();
+        preferences.edit().putString(UtilStrings.NAME_HELPER, helperNameId[1]).apply();
 
-        helperName.setText(getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.NAME_HELPER, ""));
+        helperName.setText(preferences.getString(UtilStrings.NAME_HELPER, ""));
         return super.onOptionsItemSelected(item);
     }
 
@@ -825,10 +831,10 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
                 }
                 isToday();
 
-                reset = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getBoolean(UtilStrings.RESET, true);
+                reset = preferences.getBoolean(UtilStrings.RESET, false);
                 if (!reset) {
-                    totalTickets = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.TOTAL_TICKETS, 0);
-                    if (totalTickets != getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.SENT_TICKET, 0))
+                    totalTickets = preferences.getInt(UtilStrings.TOTAL_TICKETS, 0);
+                    if (totalTickets != preferences.getInt(UtilStrings.SENT_TICKET, 0))
                         TicketInfoDataPush.pushBusData(TicketAndTracking.this, totalTickets, totalCollections);
 
                     if (databaseHelper.listTickets().size() > 0) {
@@ -841,7 +847,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
 
                 totalRemainingTickets.setText(GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.listTickets().size())) + "\n" + GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.remainingAmount())));
                 /*if (databaseHelper.listTickets().size() > 0) {
-                    boolean datasending = getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getBoolean(UtilStrings.DATA_SENDING, false);
+                    boolean datasending = preferences.getBoolean(UtilStrings.DATA_SENDING, false);
                     if (!datasending) {
                         databaseHelper.ticketInfoLists();
                     }
@@ -852,8 +858,8 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
               /*  float distance, nearest = 0;
 
                 for (int i = 0; i < databaseHelper.routeStationLists().size(); i++) {
-                    double startLat = Double.parseDouble(getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.LATITUDE, "0.0"));
-                    double startLng = Double.parseDouble(getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.LONGITUDE, "0.0"));
+                    double startLat = Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"));
+                    double startLng = Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0"));
                     double endLat = Double.parseDouble(databaseHelper.routeStationLists().get(i).station_lat);
                     double endLng = Double.parseDouble(databaseHelper.routeStationLists().get(i).station_lng);
                     distance = GeneralUtils.calculateDistance(startLat, startLng, endLat, endLng);
@@ -862,7 +868,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
                     } else {
                         if (distance < nearest) {
                             nearest = distance;
-                            getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.CURRENT_ID, databaseHelper.routeStationLists().get(i).station_id).apply();
+                            preferences.edit().putString(UtilStrings.CURRENT_ID, databaseHelper.routeStationLists().get(i).station_id).apply();
 
                         }
 

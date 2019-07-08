@@ -223,13 +223,13 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
                                                                                    }*/
 
                                     //imageprint
-                                    /* ((TicketAndTracking) context).mBitmap = drawText(busName + "\n" +
+                                     ((TicketAndTracking) context).mBitmap = drawText(busName + "\n" +
                                              GeneralUtils.getUnicodeNumber(ticketInfoList.ticketNumber) + "\n" +
                                              "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.ticketPrice) + discountType + "\n" +
-                                             *//*nearest_name + "\n" +*//*
+                                             nearest_name + "\n" +
                                              GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                                              + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
-                                             GeneralUtils.getUnicodeNumber(GeneralUtils.getTime()), 380);*/
+                                             GeneralUtils.getUnicodeNumber(GeneralUtils.getTime()), 380);
                                 } else {
                                     ((TicketAndTracking) context).helperName.setText("सहायक छान्नुहोस् ।");
                                 }
