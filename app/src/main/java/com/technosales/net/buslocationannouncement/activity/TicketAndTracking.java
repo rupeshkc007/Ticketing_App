@@ -15,8 +15,6 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
-import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -76,10 +74,7 @@ import com.technosales.net.buslocationannouncement.network.TicketInfoDataPush;
 import com.technosales.net.buslocationannouncement.pojo.HelperList;
 import com.technosales.net.buslocationannouncement.pojo.PriceList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
-import com.technosales.net.buslocationannouncement.printer.BluetoothDeviceChooseDialog;
-import com.technosales.net.buslocationannouncement.printer.UsbDeviceChooseDialog;
-import com.technosales.net.buslocationannouncement.printer.apps.BaseApplication;
-import com.technosales.net.buslocationannouncement.printer.utils.BaseEnum;
+import com.technosales.net.buslocationannouncement.printer.AidlUtil;
 import com.technosales.net.buslocationannouncement.trackcar.AutostartReceiver;
 import com.technosales.net.buslocationannouncement.trackcar.TrackingController;
 import com.technosales.net.buslocationannouncement.trackcar.TrackingService;
@@ -93,7 +88,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
 
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_ACCURACY;
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_DEVICE;
@@ -101,7 +95,7 @@ import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_INTERVAL;
 import static com.technosales.net.buslocationannouncement.trackcar.MainFragment.KEY_URL;
 
-public class TicketAndTracking extends AppCompatActivity implements PrinterObserver, GetPricesFares.OnPriceUpdate {
+public class TicketAndTracking extends AppCompatActivity implements GetPricesFares.OnPriceUpdate {
 
     private static final int PERMISSIONS_REQUEST_LOCATION = 2;
     private static final int ALARM_MANAGER_INTERVAL = 15000;
@@ -123,16 +117,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
 
 
     /////
-    private int checkedConType = BaseEnum.CON_USB;
-    private PrinterFactory printerFactory;
-    private RTPrinter rtPrinter;
-    private PrinterInterface curPrinterInterface = null;
-    public Object configObj;
-    public UsbDeviceChooseDialog usbDeviceChooseDialog;
-    public BluetoothDeviceChooseDialog bluetoothDeviceChooseDialog;
 
-    private int bmpPrintWidth = 40;
-    public Bitmap mBitmap;
     private Toolbar mainToolBar;
     private int totalTickets;
     private int totalCollections;
@@ -153,6 +138,10 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ticket_and_tracking);
+
+        AidlUtil.getInstance().connectPrinterService(this);
+
+        AidlUtil.getInstance().initPrinter();
 
 
         /**/
@@ -366,6 +355,11 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         });
 
         setTotal();
+        try {
+            rHandler.removeCallbacks(rTicker);
+        } catch (Exception ex) {
+
+        }
         interValDataPush();
 
         priceListView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -393,18 +387,6 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         });
 
 
-        BaseApplication.instance.setCurrentCmdType(BaseEnum.CMD_ESC);
-        printerFactory = new UniversalPrinterFactory();
-        rtPrinter = printerFactory.create();
-
-        /*tv_ver.setText("PrinterExample Ver: v" + TonyUtils.getVersionName(this));*/
-        PrinterObserverManager.getInstance().add(this);//添加连接状态监听
-
-        setEscPrint();
-        /*showUSBDeviceChooseDialog();    //use for voting*/
-
-
-        showBluetoothDeviceChooseDialog();
 
 
     }
@@ -468,92 +450,6 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         }
     }
 
-
-    private void showBluetoothDeviceChooseDialog() {
-        bluetoothDeviceChooseDialog = new BluetoothDeviceChooseDialog();
-        bluetoothDeviceChooseDialog.setOnDeviceItemClickListener(new BluetoothDeviceChooseDialog.onDeviceItemClickListener() {
-            @Override
-            public void onDeviceItemClick(BluetoothDevice device) {
-
-                /*configObj = new BluetoothEdrConfigBean(device);
-                connectBlueTh();*/
-            }
-        });
-        bluetoothDeviceChooseDialog.show(TicketAndTracking.this.getFragmentManager(), null);
-    }
-
-
-    private void showUSBDeviceChooseDialog() {
-        usbDeviceChooseDialog = new UsbDeviceChooseDialog();
-        usbDeviceChooseDialog.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                UsbDevice mUsbDevice = (UsbDevice) parent.getAdapter().getItem(position);
-                PendingIntent mPermissionIntent = PendingIntent.getBroadcast(
-                        TicketAndTracking.this,
-                        0,
-                        new Intent(TicketAndTracking.this.getApplicationInfo().packageName),
-                        0);
-/*
-                tv_device_selected.setText(getString(R.string.adapter_usbdevice) + mUsbDevice.getDeviceId()); //+ (position + 1));
-*/
-                configObj = new UsbConfigBean(BaseApplication.getInstance(), mUsbDevice, mPermissionIntent);
-                /*tv_device_selected.setTag(BaseEnum.HAS_DEVICE);
-                isConfigPrintEnable(configObj);*/
-                usbDeviceChooseDialog.dismiss();
-
-                doConnect();
-            }
-        });
-        usbDeviceChooseDialog.show(getFragmentManager(), null);
-    }
-
-    public void connectBlueTh() {
-        BluetoothEdrConfigBean bluetoothEdrConfigBean = (BluetoothEdrConfigBean) configObj;
-        connectBluetooth(bluetoothEdrConfigBean);
-    }
-
-    private void connectBluetooth(BluetoothEdrConfigBean bluetoothEdrConfigBean) {
-        PIFactory piFactory = new BluetoothFactory();
-        PrinterInterface printerInterface = piFactory.create();
-        printerInterface.setConfigObject(bluetoothEdrConfigBean);
-        rtPrinter.setPrinterInterface(printerInterface);
-        try {
-            rtPrinter.connect(bluetoothEdrConfigBean);
-            BaseApplication.instance.setRtPrinter(rtPrinter);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-
-        }
-
-    }
-
-    public void doConnect() {
-        UsbConfigBean usbConfigBean = (UsbConfigBean) configObj;
-        connectUSB(usbConfigBean);
-    }
-
-    private void connectUSB(UsbConfigBean usbConfigBean) {
-        UsbManager mUsbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-        PIFactory piFactory = new UsbFactory();
-        PrinterInterface printerInterface = piFactory.create();
-        printerInterface.setConfigObject(usbConfigBean);
-        rtPrinter.setPrinterInterface(printerInterface);
-
-        if (mUsbManager.hasPermission(usbConfigBean.usbDevice)) {
-            try {
-                rtPrinter.connect(usbConfigBean);
-                BaseApplication.instance.setRtPrinter(rtPrinter);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            mUsbManager.requestPermission(usbConfigBean.usbDevice, usbConfigBean.pendingIntent);
-        }
-
-
-    }
 
 
     public void setPriceLists() {
@@ -674,100 +570,6 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
         }
     }
 
-
-    @Override
-    public void printerObserverCallback(PrinterInterface printerInterface, int i) {
-
-    }
-
-    @Override
-    public void printerReadMsgCallback(PrinterInterface printerInterface, byte[] bytes) {
-
-    }
-
-    private void setEscPrint() {
-        /*BaseApplication.instance.setCurrentCmdType(BaseEnum.CMD_ESC);*/
-        printerFactory = new ThermalPrinterFactory();
-        rtPrinter = printerFactory.create();
-        rtPrinter.setPrinterInterface(curPrinterInterface);
-    }
-
-    public void escPrint(String ticketNumber) throws UnsupportedEncodingException {
-        rtPrinter = BaseApplication.getInstance().getRtPrinter();
-        if (rtPrinter != null) {
-            CmdFactory escFac = new EscFactory();
-            Cmd escCmd = escFac.create();
-            escCmd.append(escCmd.getHeaderCmd());//初始化, Initial
-
-            escCmd.setChartsetName("UTF-8");
-
-            TextSetting textSetting = new TextSetting();
-
-            textSetting.setAlign(CommonEnum.ALIGN_MIDDLE);//对齐方式-左对齐，居中，右对齐
-            textSetting.setBold(SettingEnum.Disable);
-            textSetting.setUnderline(SettingEnum.Disable);
-            textSetting.setIsAntiWhite(SettingEnum.Disable);
-            textSetting.setDoubleHeight(SettingEnum.Disable);
-            textSetting.setDoubleWidth(SettingEnum.Disable);
-
-            textSetting.setEscFontType(ESCFontTypeEnum.FONT_A_12x24);
-
-            escCmd.append(escCmd.getTextCmd(textSetting, ticketNumber, "UTF-8"));
-
-            escCmd.append(escCmd.getLFCRCmd());
-            escCmd.append(escCmd.getLFCRCmd());
-            escCmd.append(escCmd.getLFCRCmd());
-            escCmd.append(escCmd.getLFCRCmd());
-            escCmd.append(escCmd.getLFCRCmd());
-            escCmd.append(escCmd.getHeaderCmd());//初始化, Initial
-            escCmd.append(escCmd.getLFCRCmd());
-
-            rtPrinter.writeMsgAsync(escCmd.getAppendCmds());
-        }
-    }
-
-
-    public void escImgPrint() throws SdkException {
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-
-                CmdFactory cmdFactory = new EscFactory();
-                Cmd cmd = cmdFactory.create();
-                cmd.append(cmd.getHeaderCmd());
-
-                CommonSetting commonSetting = new CommonSetting();
-                commonSetting.setAlign(CommonEnum.ALIGN_MIDDLE);
-                commonSetting.setEscLineSpacing(12);
-                cmd.append(cmd.getCommonSettingCmd(commonSetting));
-
-                BitmapSetting bitmapSetting = new BitmapSetting();
-                bitmapSetting.setBmpPrintMode(BmpPrintMode.MODE_SINGLE_COLOR);
-
-                bitmapSetting.setBimtapLimitWidth(bmpPrintWidth * 8);
-                try {
-                    /*Bitmap bb= Bitmap.createScaledBitmap(mBitmap, 300, 100, false);*/
-                    cmd.append(cmd.getBitmapCmd(bitmapSetting, mBitmap));
-                } catch (SdkException e) {
-                    e.printStackTrace();
-                }
-                cmd.append(cmd.getLFCRCmd());
-                cmd.append(cmd.getLFCRCmd());
-                cmd.append(cmd.getLFCRCmd());
-                cmd.append(cmd.getLFCRCmd());
-                cmd.append(cmd.getLFCRCmd());
-                cmd.append(cmd.getLFCRCmd());
-                if (rtPrinter != null) {
-                    rtPrinter.writeMsg(cmd.getAppendCmds());//Sync Write
-                }
-
-            }
-        }).start();
-
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
@@ -846,34 +648,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
 
 
                 totalRemainingTickets.setText(GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.listTickets().size())) + "\n" + GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.remainingAmount())));
-                /*if (databaseHelper.listTickets().size() > 0) {
-                    boolean datasending = preferences.getBoolean(UtilStrings.DATA_SENDING, false);
-                    if (!datasending) {
-                        databaseHelper.ticketInfoLists();
-                    }
 
-
-                }*/
-
-              /*  float distance, nearest = 0;
-
-                for (int i = 0; i < databaseHelper.routeStationLists().size(); i++) {
-                    double startLat = Double.parseDouble(preferences.getString(UtilStrings.LATITUDE, "0.0"));
-                    double startLng = Double.parseDouble(preferences.getString(UtilStrings.LONGITUDE, "0.0"));
-                    double endLat = Double.parseDouble(databaseHelper.routeStationLists().get(i).station_lat);
-                    double endLng = Double.parseDouble(databaseHelper.routeStationLists().get(i).station_lng);
-                    distance = GeneralUtils.calculateDistance(startLat, startLng, endLat, endLng);
-                    if (i == 0) {
-                        nearest = distance;
-                    } else {
-                        if (distance < nearest) {
-                            nearest = distance;
-                            preferences.edit().putString(UtilStrings.CURRENT_ID, databaseHelper.routeStationLists().get(i).station_id).apply();
-
-                        }
-
-                    }
-                }*/
                 rHandler.postAtTime(rTicker, next);
             }
         }

@@ -29,6 +29,7 @@ import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.pojo.TicketInfoList;
+import com.technosales.net.buslocationannouncement.printer.AidlUtil;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
 import com.technosales.net.buslocationannouncement.utils.TextToVoice;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
@@ -298,13 +299,13 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                                 strTotal = strTotal.substring(0, 4);
                             }
                             //imageprint
-                            ((TicketAndTracking) context).mBitmap = drawText(busName + "\n" +
+                            AidlUtil.getInstance().printText(busName + "\n" +
                                     GeneralUtils.getUnicodeNumber(ticketInfoList.ticketNumber) + "\n" +
                                     GeneralUtils.getUnicodeNumber(strTotal) + "कि.मी , रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.ticketPrice) + discountType + "\n" +
                                     nearestName + "-" + routeStationModelList.station_name + "\n" +
                                     GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
-                                    GeneralUtils.getUnicodeNumber(GeneralUtils.getTime()), 380);
+                                    GeneralUtils.getUnicodeNumber(GeneralUtils.getTime()), 25,true,false);
                         } else {
                             ((TicketAndTracking) context).helperName.setText("सहायक छान्नुहोस् ।");
                         }
@@ -356,43 +357,6 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
 
 
         }
-    }
-
-    public Bitmap drawText(String text, int textWidth) {
-
-        TextPaint textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG);
-        textPaint.setStyle(Paint.Style.FILL);
-//        textPaint.setColor(Color.parseColor("#ffffff"));
-        textPaint.setColor(Color.parseColor("#000000"));
-        textPaint.setTextSize(45);
-
-        StaticLayout mTextLayout = new StaticLayout(text, textPaint, textWidth, Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false);
-
-        // Create bitmap and canvas to draw to
-        Bitmap b = Bitmap.createBitmap(textWidth, mTextLayout.getHeight(), Bitmap.Config.ARGB_4444);
-        Canvas c = new Canvas(b);
-
-        // Draw background
-        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG);
-        paint.setStyle(Paint.Style.FILL);
-//        paint.setColor(Color.parseColor("#000000"));
-        paint.setColor(Color.parseColor("#ffffff"));
-        c.drawPaint(paint);
-
-        // Draw text
-        c.save();
-        c.translate(0, 0);
-        mTextLayout.draw(c);
-        c.restore();
-
-        try {
-
-            ((TicketAndTracking) context).escImgPrint();
-        } catch (SdkException e) {
-            e.printStackTrace();
-        }
-
-        return b;
     }
 
 }
