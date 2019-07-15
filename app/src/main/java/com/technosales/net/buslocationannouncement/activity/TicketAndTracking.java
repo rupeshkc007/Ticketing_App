@@ -216,7 +216,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
 
 //        databaseHelper.getWritableDatabase().execSQL("DELETE FROM " + DatabaseHelper.PRICE_TABLE);
 
-        priceLists = databaseHelper.priceLists();
+        priceLists = databaseHelper.priceLists(normalDiscountToggle.isOn());
         /*if (priceLists.size() == 0) {
             priceLists = GeneralUtils.priceCsv(this);
         }*/
@@ -301,7 +301,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
 
                 if (isOn) {
                     if (mode != UtilStrings.MODE_3) {
-                        setPriceLists();
+                        setPriceLists(isOn);
                     } else {
 //                        priceListView.setAdapter(new PriceAdapterPrices(databaseHelper.routeStationLists(),TicketAndTracking.this));
                         priceListView.setAdapter(priceAdapterPrices);
@@ -309,7 +309,7 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
                     }
                 } else {
                     if (mode != UtilStrings.MODE_3) {
-                        setPriceLists();
+                        setPriceLists(isOn);
                     } else {
                         priceListView.setAdapter(priceAdapterPrices);
 //                        priceListView.setAdapter(new PriceAdapterPrices(databaseHelper.routeStationLists(),TicketAndTracking.this));
@@ -556,8 +556,8 @@ public class TicketAndTracking extends AppCompatActivity implements PrinterObser
     }
 
 
-    public void setPriceLists() {
-        priceLists = databaseHelper.priceLists();
+    public void setPriceLists(boolean discountToogle) {
+        priceLists = databaseHelper.priceLists(discountToogle);
         if (mode == UtilStrings.MODE_1) {
 
             priceListView.setAdapter(new PriceAdapter(priceLists, TicketAndTracking.this));

@@ -480,7 +480,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         getWritableDatabase().execSQL(sql);
     }
 
-    public List<PriceList> priceLists() {
+    public List<PriceList> priceLists(boolean normalDiscount) {
         List<PriceList> priceLists = new ArrayList<>();
 
         String sql = "SELECT * FROM " + PRICE_TABLE;
@@ -491,7 +491,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             priceList.price_discount_value = c.getString(c.getColumnIndex(PRICE_DISCOUNT_VALUE));
             priceList.price_min_distance = c.getInt(c.getColumnIndex(PRICE_MIN_DISTANCE));
             priceList.price_distance = c.getInt(c.getColumnIndex(PRICE_DISTANCE));
-            priceLists.add(priceList);
+            if (normalDiscount){
+                boolean matchedPrice = false;
+                for (int i = 0; i < priceLists.size(); i++) {
+                    if (priceLists.get(i).price_discount_value.equals(priceList.price_discount_value)) {
+                        priceLists.get(i).price_distance = priceList.price_distance;
+                        matchedPrice = true;
+                        break;
+                    }
+                }
+                if (!matchedPrice) {
+                    priceLists.add(priceList);
+                }
+            }else {
+                priceLists.add(priceList);
+            }
+
+
+
         }
         c.close();
         return priceLists;
@@ -715,7 +732,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public ArrayList<AdvertiseList> adFilename(String stationId) {
         ArrayList<AdvertiseList> adList = new ArrayList<>();
-        String sql = "SELECT * FROM " + ADVERTISEMENT_TABLE + " WHERE " + ADVERTISEMENT_STATIONS + " ='" + stationId + "' AND " + ADVERTISEMENT_COUNT + ">" + 0+" AND "+ADVERTISEMENT_TYPE+" ="+UtilStrings.TYPE_ADV;
+        String sql = "SELECT * FROM " + ADVERTISEMENT_TABLE + " WHERE " + ADVERTISEMENT_STATIONS + " ='" + stationId + "' AND " + ADVERTISEMENT_COUNT + ">" + 0 + " AND " + ADVERTISEMENT_TYPE + " =" + UtilStrings.TYPE_ADV;
         Cursor c = getWritableDatabase().rawQuery(sql, null);
         while (c.moveToNext()) {
             AdvertiseList advertiseList = new AdvertiseList();
@@ -734,9 +751,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return adList;
     }
+
     public ArrayList<AdvertiseList> noticeList() {
         ArrayList<AdvertiseList> adList = new ArrayList<>();
-        String sql = "SELECT * FROM " + ADVERTISEMENT_TABLE + " WHERE " + ADVERTISEMENT_TYPE+" ="+UtilStrings.TYPE_NOTICE;
+        String sql = "SELECT * FROM " + ADVERTISEMENT_TABLE + " WHERE " + ADVERTISEMENT_TYPE + " =" + UtilStrings.TYPE_NOTICE;
         Cursor c = getWritableDatabase().rawQuery(sql, null);
         while (c.moveToNext()) {
             AdvertiseList advertiseList = new AdvertiseList();
@@ -750,13 +768,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return adList;
     }
 
-    public int noticeAdSize(){
+    public int noticeAdSize() {
         ArrayList<AdvertiseList> adList = new ArrayList<>();
         String sql = "SELECT * FROM " + ADVERTISEMENT_TABLE;
         Cursor c = getWritableDatabase().rawQuery(sql, null);
         while (c.moveToNext()) {
             AdvertiseList advertiseList = new AdvertiseList();
-            advertiseList.adType =  c.getInt(c.getColumnIndex(ADVERTISEMENT_TYPE));
+            advertiseList.adType = c.getInt(c.getColumnIndex(ADVERTISEMENT_TYPE));
             Log.i("updateSql", "" + advertiseList.adCount);
             adList.add(advertiseList);
         }
