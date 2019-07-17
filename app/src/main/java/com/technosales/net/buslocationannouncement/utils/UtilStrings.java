@@ -57,4 +57,6 @@ public class UtilStrings {
 
     public static final String FIRST_RUN = "first_run";
 
+    public static final int PRINTING_TEXT_SIZE = 30;
+
 }

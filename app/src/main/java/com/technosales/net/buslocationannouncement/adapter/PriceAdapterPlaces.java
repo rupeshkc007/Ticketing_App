@@ -34,6 +34,7 @@ import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.pojo.PriceList;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
 import com.technosales.net.buslocationannouncement.pojo.TicketInfoList;
+import com.technosales.net.buslocationannouncement.printer.AidlUtil;
 import com.technosales.net.buslocationannouncement.utils.GeneralUtils;
 import com.technosales.net.buslocationannouncement.utils.UtilStrings;
 
@@ -386,13 +387,13 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
 
 
                             //imageprint
-                            ((TicketAndTracking) context).mBitmap = drawText(busName + "\n" +
+                            AidlUtil.getInstance().printText(busName + "\n" +
                                     GeneralUtils.getUnicodeNumber(ticketInfoList.ticketNumber) + "\n" +
                                     "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.ticketPrice) + discountType + "\n" +
                                     nearest_name + "-" + toGetOff + "\n" +
                                     GeneralUtils.getNepaliMonth(String.valueOf(month)) + " "
                                     + GeneralUtils.getUnicodeNumber(String.valueOf(day)) + " " +
-                                    GeneralUtils.getUnicodeNumber(GeneralUtils.getTime()), 380);
+                                    GeneralUtils.getUnicodeNumber(GeneralUtils.getTime())+"\n", UtilStrings.PRINTING_TEXT_SIZE,true,false);
                         } else {
                             ((TicketAndTracking) context).helperName.setText("सहायक छान्नुहोस् ।");
                         }
@@ -451,62 +452,7 @@ public class PriceAdapterPlaces extends RecyclerView.Adapter<PriceAdapterPlaces.
         }
     }
 
-    public Bitmap drawText(String text, int textWidth) {
 
-        TextPaint textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG);
-        textPaint.setStyle(Paint.Style.FILL);
-//        textPaint.setColor(Color.parseColor("#ffffff"));
-        textPaint.setColor(Color.parseColor("#000000"));
-        textPaint.setTextSize(45);
-
-        StaticLayout mTextLayout = new StaticLayout(text, textPaint, textWidth, Layout.Alignment.ALIGN_CENTER, 1.0f, 0.0f, false);
-
-        // Create bitmap and canvas to draw to
-        Bitmap b = Bitmap.createBitmap(textWidth, mTextLayout.getHeight(), Bitmap.Config.ARGB_4444);
-        Canvas c = new Canvas(b);
-
-        // Draw background
-        Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.LINEAR_TEXT_FLAG);
-        paint.setStyle(Paint.Style.FILL);
-//        paint.setColor(Color.parseColor("#000000"));
-        paint.setColor(Color.parseColor("#ffffff"));
-        c.drawPaint(paint);
-
-        // Draw text
-        c.save();
-        c.translate(0, 0);
-        mTextLayout.draw(c);
-        c.restore();
-
-        try {
-
-            ((TicketAndTracking) context).escImgPrint();
-        } catch (SdkException e) {
-            e.printStackTrace();
-        }
-
-        return b;
-    }
-
-    private void saveBitmap(Bitmap bitmap, String time) {
-        File deviceScreenShotPath = new File("/storage/sdcard0/DCIM/Camera/" + String.valueOf(total_tickets) + ".jpg");
-
-
-        FileOutputStream fos;
-        try {
-            fos = new FileOutputStream(deviceScreenShotPath);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-
-            fos.flush();
-            fos.close();
-        } catch (FileNotFoundException e) {
-            Log.e("GREC", e.getMessage(), e);
-        } catch (IOException e) {
-            Log.e("GREC", e.getMessage(), e);
-
-        }
-
-    }
 
 
 }

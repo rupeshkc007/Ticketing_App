@@ -111,7 +111,7 @@ public class TicketInfoDataPush {
                         resetData(context);
                     }
                 }
-            });
+            }.timeout(10000));
         } else {
 
         }

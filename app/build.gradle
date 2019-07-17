@@ -4,7 +4,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.technosales.net.buslocationannouncement"
-        minSdkVersion 16
+        minSdkVersion 20
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -50,6 +50,8 @@ dependencies {
     implementation 'com.github.angads25:toggle:1.0.0'
 
     implementation 'com.github.keyrunHORNET:date_picker_converter:2.2'
+    implementation files('libs/PayLib-release-1.4.24.aar')
+    implementation 'com.sunmi:printerlibrary:1.0.6'
 
 
 }
