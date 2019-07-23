@@ -8,6 +8,7 @@ import android.util.Log;
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
+import com.technosales.net.buslocationannouncement.activity.RegisterActivity;
 import com.technosales.net.buslocationannouncement.activity.TicketAndTracking;
 import com.technosales.net.buslocationannouncement.helper.DatabaseHelper;
 import com.technosales.net.buslocationannouncement.pojo.RouteStationList;
@@ -37,8 +38,6 @@ public class RouteStation {
                         JSONArray data = object.optJSONArray("data");
                         int order = 0;
                         databaseHelper.clearStations();
-
-
                         if (data.optJSONObject(0).optString("station_id").equals(data.optJSONObject(data.length() - 1).optString("station_id"))) {
                             context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putInt(UtilStrings.ROUTE_TYPE, UtilStrings.RING_ROAD).apply();
                         } else {
@@ -48,7 +47,6 @@ public class RouteStation {
                             JSONObject dataobj = data.optJSONObject(i);
                             String sts = dataobj.optString("status");
                             int routeType = context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getInt(UtilStrings.ROUTE_TYPE, UtilStrings.NON_RING_ROAD);
-
                             if (sts.equals("0")) {
                                 order++;
                                 RouteStationList routeStationList = new RouteStationList();
@@ -58,27 +56,25 @@ public class RouteStation {
                                 routeStationList.station_name_eng = dataobj.optString("name");
                                 routeStationList.station_lat = dataobj.optString("latitude");
                                 routeStationList.station_lng = dataobj.optString("longitude");
-
-
                                 if (i == 0) {
                                     routeStationList.station_distance = 0;
                                 } else {
-
                                     if (routeType == UtilStrings.RING_ROAD) {
                                         routeStationList.station_distance =/*databaseHelper.distancesFromStart()+ */GeneralUtils.calculateDistance(databaseHelper.recentStationLat(order - 1), databaseHelper.recentStationLng(order - 1), Double.parseDouble(routeStationList.station_lat), Double.parseDouble(routeStationList.station_lng));
                                     } else {
-                                        routeStationList.station_distance =databaseHelper.distancesFromStart()+ GeneralUtils.calculateDistance(databaseHelper.recentStationLat(order - 1), databaseHelper.recentStationLng(order - 1), Double.parseDouble(routeStationList.station_lat), Double.parseDouble(routeStationList.station_lng));
-
+                                        routeStationList.station_distance = databaseHelper.distancesFromStart() + GeneralUtils.calculateDistance(databaseHelper.recentStationLat(order - 1), databaseHelper.recentStationLng(order - 1), Double.parseDouble(routeStationList.station_lat), Double.parseDouble(routeStationList.station_lng));
                                     }
                                 }
                                 databaseHelper.insertStations(routeStationList);
-
-
                             }
                         }
                         progressDialog.dismiss();
                         context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putString(UtilStrings.ROUTE_ID, routeId).apply();
-                                                context.startActivity(new Intent(context, TicketAndTracking.class));
+                        context.startActivity(new Intent(context, TicketAndTracking.class));
+                        try {
+                            ((RegisterActivity) context).finish();
+                        } catch (Exception ex) {
+                        }
                     } else {
                         getRouteStation(context, routeId, progressDialog);
                     }

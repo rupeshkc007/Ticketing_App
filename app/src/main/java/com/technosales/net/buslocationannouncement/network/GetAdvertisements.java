@@ -79,16 +79,17 @@ public class GetAdvertisements {
         File ext = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         File target = new File(ext, fileName);
         AQuery aq = new AQuery(context);
-        aq.download("http://117.121.237.226:83/routemanagement/public/storage/adv_files/" + fileName, target, new AjaxCallback<File>() {
-            public void callback(String url, File file, AjaxStatus status) {
-                if (file != null) {
-                    Toast.makeText(context, fileName + " Download", Toast.LENGTH_SHORT).show();
-                } else {
-
+        if (!target.exists()){
+            aq.download("http://117.121.237.226:83/routemanagement/public/storage/adv_files/" + fileName, target, new AjaxCallback<File>() {
+                public void callback(String url, File file, AjaxStatus status) {
+                    if (file != null) {
+                        Toast.makeText(context, fileName + " Download", Toast.LENGTH_SHORT).show();
+                    }
                 }
-            }
 
-        });
+            });
+        }
+
     }
 
 }
