@@ -15,7 +15,6 @@ public class UtilStrings {
     public static final String DEVICE_NAME = "device_name";
     public static final String NAME_HELPER = "helper_name";
     public static final String ID_HELPER = "helper_id";
-    public static final String RESET = "reset";
     public static final String SENT_TICKET = "sent_ticket";
     public static final String FORWARD = "rev_for"; /// save if bus is going along with order or returning
     public static final String ROUTE_TYPE = "route_type";

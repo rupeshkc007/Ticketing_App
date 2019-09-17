@@ -420,12 +420,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
             new DatabaseHelper(this).clearTxtTable();
             setTotal();
             isFirstRun = preferences.getBoolean(UtilStrings.FIRST_RUN, true);
-            if (isFirstRun) {
-                preferences.edit().putBoolean(UtilStrings.RESET, false).apply();
-            } else {
-                preferences.edit().putBoolean(UtilStrings.RESET, true).apply();
-            }
-            preferences.edit().putBoolean(UtilStrings.FIRST_RUN, false).apply();
+
 
             /*TicketInfoDataPush.resetData(TicketAndTracking.this);*/
 
@@ -633,8 +628,6 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                 }
                 isToday();
 
-                reset = preferences.getBoolean(UtilStrings.RESET, false);
-                if (!reset) {
                     totalTickets = preferences.getInt(UtilStrings.TOTAL_TICKETS, 0);
                     if (totalTickets != preferences.getInt(UtilStrings.SENT_TICKET, 0))
                         TicketInfoDataPush.pushBusData(TicketAndTracking.this, totalTickets, totalCollections);
@@ -642,9 +635,7 @@ public class TicketAndTracking extends AppCompatActivity implements GetPricesFar
                     if (databaseHelper.listTickets().size() > 0) {
                         databaseHelper.ticketInfoLists();
                     }
-                } else {
-                    TicketInfoDataPush.resetData(TicketAndTracking.this);
-                }
+
 
 
                 totalRemainingTickets.setText(GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.listTickets().size())) + "\n" + GeneralUtils.getUnicodeNumber(String.valueOf(databaseHelper.remainingAmount())));

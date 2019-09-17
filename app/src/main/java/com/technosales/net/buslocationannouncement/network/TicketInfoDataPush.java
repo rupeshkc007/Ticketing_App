@@ -89,32 +89,4 @@ public class TicketInfoDataPush {
         }
 
     }
-
-    public static void resetData(final Context context) {
-        if (GeneralUtils.isNetworkAvailable(context)) {
-            final Map<String, Object> params = new HashMap<>();
-            params.put("device_id", context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).getString(UtilStrings.DEVICE_ID, ""));
-            AQuery aQuery = new AQuery(context);
-            aQuery.ajax(UtilStrings.RESET_DEVICE, params, JSONObject.class, new AjaxCallback<JSONObject>() {
-                @Override
-                public void callback(String url, JSONObject object, AjaxStatus status) {
-                    super.callback(url, object, status);
-                    Log.i("getParams", object + ":" + params + ":" + UtilStrings.RESET_DEVICE);
-                    if (object != null) {
-                        if (object.optString("error").equals("false")) {
-                            context.getSharedPreferences(UtilStrings.SHARED_PREFERENCES, 0).edit().putBoolean(UtilStrings.RESET, false).apply();
-                        }
-
-
-                    } else {
-
-                        resetData(context);
-                    }
-                }
-            }.timeout(10000));
-        } else {
-
-        }
-
-    }
 }
