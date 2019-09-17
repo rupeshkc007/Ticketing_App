@@ -92,18 +92,11 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
                 holder.routeStationItem.setBackground(ContextCompat.getDrawable(context, R.drawable.discount_price_bg));
             }
 
-           /* if (routeStationModelList.station_id.equals(preferences.getString(UtilStrings.CURRENT_ID, ""))) {
-                holder.routeStationItem.setTextColor(context.getResources().getColorStateList(R.color.discount_txt_color));
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    holder.routeStationItem.setBackground(ContextCompat.getDrawable(context, R.drawable.discount_cr_station));
-                }
-            }*/
+
         } else {
             if (routeStationModelList.station_id.equals(preferences.getString(UtilStrings.CURRENT_ID, ""))) {
                 holder.routeStationItem.setTextColor(context.getResources().getColorStateList(R.color.text_color));
-               /* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    holder.routeStationItem.setBackground(ContextCompat.getDrawable(context, R.drawable.normal_cr_station));
-                }*/
+
             }
         }
 
@@ -282,23 +275,13 @@ public class PriceAdapterPrices extends RecyclerView.Adapter<PriceAdapterPrices.
 
 
                             databaseHelper.insertTicketInfo(ticketInfoList);
-                /* try {
-                     ((TicketAndTracking) context).escPrint("TICKET No.:" + ticketInfoList.ticketNumber + "\n" +
-                             "Rs." + ticketInfoList.ticketPrice + " Type:" + ticketType + "\n" +
-                             nearest_name + "\n" +
-                             GeneralUtils.getFullDate() + " " + GeneralUtils.getTime());
-                 } catch (UnsupportedEncodingException e) {
-                     e.printStackTrace();
 
-
-                                                                                   }*/
 
                             float distanceInKm = (totalDistance / 1000);
                             String strTotal = distanceInKm + "";
                             if (strTotal.length() > 4) {
                                 strTotal = strTotal.substring(0, 4);
                             }
-                            //imageprint
                             AidlUtil.getInstance().printText(busName + "\n" +
                                     GeneralUtils.getUnicodeNumber(ticketInfoList.ticketNumber) + "\n" +
                                     GeneralUtils.getUnicodeNumber(strTotal) + "कि.मी , रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.ticketPrice) + discountType + "\n" +

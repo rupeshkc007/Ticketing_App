@@ -93,12 +93,6 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
             holder.price_value.setText(priceList.price_value);
 
         }
-       /* holder.price_value.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });*/
         holder.priceCard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -202,18 +196,7 @@ public class PriceAdapter extends RecyclerView.Adapter<PriceAdapter.MyViewHolder
 
 
                                     databaseHelper.insertTicketInfo(ticketInfoList);
-                /* try {
-                     ((TicketAndTracking) context).escPrint("TICKET No.:" + ticketInfoList.ticketNumber + "\n" +
-                             "Rs." + ticketInfoList.ticketPrice + " Type:" + ticketType + "\n" +
-                             nearest_name + "\n" +
-                             GeneralUtils.getFullDate() + " " + GeneralUtils.getTime());
-                 } catch (UnsupportedEncodingException e) {
-                     e.printStackTrace();
 
-
-                                                                                   }*/
-
-                                    //imageprint
                                     AidlUtil.getInstance().printText(busName + "\n" +
                                             GeneralUtils.getUnicodeNumber(ticketInfoList.ticketNumber) + "\n" +
                                             "रु." + GeneralUtils.getUnicodeNumber(ticketInfoList.ticketPrice) + discountType + "\n" +
